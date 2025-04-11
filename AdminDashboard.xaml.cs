@@ -75,7 +75,7 @@ namespace ElizadeEHR
 
         private string GetAvailableDoctorsCount()
         {
-            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString)) 
             {
                 try
                 {
