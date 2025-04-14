@@ -1,0 +1,174 @@
+﻿<Window x:Class="ElizadeEHR.AdminDashboard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Admin Dashboard"
+        WindowState="Maximized"
+        Background="White"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <!-- Sidebar Button Style with Rounded Corners -->
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="50"/>
+            <!-- Ensure button has a consistent height -->
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="0"
+                                CornerRadius="10" Padding="10">
+                            <!-- Rounded corners -->
+                            <StackPanel Orientation="Horizontal">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                                <!-- Lighter gray on hover -->
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <!-- Define Two Columns: Sidebar and Main Content -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <!-- Sidebar -->
+            <ColumnDefinition Width="*"/>
+            <!-- Main Content -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Background="White" BorderThickness="1" BorderBrush="LightGray" Grid.RowSpan="2">
+            <Grid Margin="20" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- Logo -->
+                    <RowDefinition Height="*"/>
+                    <!-- Navigation Buttons -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Profile Section -->
+                </Grid.RowDefinitions>
+
+                <!-- Logo -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,20" Grid.Row="0">
+                    <TextBlock Text="ElizadeEHR" FontSize="26" Foreground="Black" VerticalAlignment="Center"/>
+                    <Image Source="/Icons/icons8-heart-with-pulse-64.png" Width="35" Height="35" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Navigation Buttons -->
+                <StackPanel Grid.Row="1">
+                    <Button Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="/Icons/icons8-dashboard-48.png" Width="22" Height="30" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Dashboard" Foreground="#26547C" VerticalAlignment="Center" FontSize="20"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="/Icons/icons8-doctor-50.png" Width="24" Height="24" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Doctor" Foreground="#26547C" VerticalAlignment="Center" FontSize="20"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="Button_Click">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="/Icons/icons8-patient-50.png" Width="20" Height="20" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Patient" Foreground="#26547C" VerticalAlignment="Center" FontSize="20"/>
+                        </StackPanel>
+                    </Button>
+
+                    <TextBlock Text="Tools" FontSize="14" FontWeight="Bold" Foreground="Gray" Margin="10,20,0,10"/>
+
+                    <Button Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="/Icons/icons8-settings-50.png" Width="20" Height="20" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Settings" Foreground="#26547C" VerticalAlignment="Center" FontSize="20"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="/Icons/icons8-support-50.png" Width="20" Height="20" Margin="10,0,5,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Chat &amp; Support" Foreground="#26547C" VerticalAlignment="Center" FontSize="20"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Profile Section (Anchored at Bottom) -->
+                <Border Background="White" BorderThickness="1" BorderBrush="LightGray" CornerRadius="10" Padding="10"
+                        Margin="0,20,0,0" Grid.Row="2">
+                    <StackPanel Orientation="Horizontal">
+                        <!-- Clickable Profile Picture -->
+                        <Image Name="ProfileImage" Source="/Icons/user.png" Width="40" Height="40" Margin="0,0,10,0" Cursor="Hand"
+                               MouseDown="ProfileImage_MouseDown"/>
+
+                        <!-- Clickable Name & Email -->
+                        <Border Background="Transparent" Cursor="Hand" MouseDown="ProfileSection_MouseDown">
+                            <StackPanel>
+                                <!-- Name TextBlock -->
+                                <TextBlock Name="NameTextBlock" Text="Roxane Grace" FontWeight="Bold" Foreground="#26547C"/>
+                                <!-- Email TextBlock -->
+                                <TextBlock Name="EmailTextBlock" Text="Matson58@example.com" Foreground="Gray"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- StackPanel to hold Welcome Admin and Current Date -->
+            <StackPanel Grid.Row="0" Margin="10">
+                <!-- Welcome Admin Text -->
+                <TextBlock Text="Welcome Admin" FontSize="40" HorizontalAlignment="left" Margin="0,10,0,0"/>
+
+                <!-- Current Date -->
+                <TextBlock Name="DateTextBlock" FontSize="16" HorizontalAlignment="left" Foreground="#7F7F7F" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- Side by side boxes for Total Patients and Available Doctors -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Patients Section -->
+                <StackPanel Grid.Column="0" Margin="10,10,10,0">
+                    <Border BorderBrush="#26547C" BorderThickness="2" CornerRadius="10" Padding="10" Background="White" Margin="20,30,0,0">
+                        <TextBlock Name="TotalPatientsTextBlock" FontSize="32" Foreground="#26547C" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Available Doctors Section -->
+                <StackPanel Grid.Column="1" Margin="10,10,10,0">
+                    <Border BorderBrush="#26547C" BorderThickness="2" CornerRadius="10" Padding="10" Background="White" Margin="20,30,0,0">
+                        <TextBlock Name="AvailableDoctorsTextBlock" FontSize="32" Foreground="#26547C" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
