@@ -1,86 +1,83 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using MySql.Data.MySqlClient;
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
+using MySqlConnector;
+using System.Windows.Media;
+using System.Windows.Data;
+using System.IO;
 
 namespace ElizadeEHR
 {
     public partial class AdminDashboard : Window
     {
-        public AdminDashboard()
+        public AdminDashboard(string fullName, string email)
         {
             InitializeComponent();
-            // Set the user email and profile picture after login
-            if (!string.IsNullOrEmpty(App.UserEmail))
-            {
-                // Display email
-                EmailTextBlock.Text = App.UserEmail;
+            LoadDashboardData(); // Call to load initial data on load
 
-                // Display full name (already combined in App.UserName)
-                NameTextBlock.Text = App.UserName;
+            LoadProfilePicture();
 
-                // Display profile picture (if it exists)
-                if (!string.IsNullOrEmpty(App.ProfilePicturePath))
-                {
-                    ProfileImage.Source = new BitmapImage(new Uri(App.ProfilePicturePath));
-                }
-            }
-
-            // Set the current date
-            DateTextBlock.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy");
-
-            // Load the total patient count
-            LoadTotalPatients();
-            LoadDashboardData();
+            // Show the name and email in the UI
+            NameTextBlock.Text = fullName;
+            EmailTextBlock.Text = email;
         }
 
-        // Load the total number of patients from the database
-        private void LoadTotalPatients()
-        {
-            int totalPatients = GetTotalPatientsFromDatabase();
-            TotalPatientsTextBlock.Text = "Total Patients: " + totalPatients;
-        }
-
-        // Fetch total number of patients from the database
-        private int GetTotalPatientsFromDatabase()
-        {
-            int patientCount = 0;
-            string query = "SELECT COUNT(*) FROM Patients";  // Assuming you have a 'Patients' table
-
-            try
-            {
-                using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
-                {
-                    conn.Open();
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
-                    patientCount = Convert.ToInt32(cmd.ExecuteScalar());
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error fetching patient count: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            return patientCount;
-        }
-
+        // Method to load initial data
         private void LoadDashboardData()
         {
-            // Example for fetching and displaying available doctors count
-            string availableDoctors = GetAvailableDoctorsCount(); // Fetch from the backend
+            // Set the welcome message
+            SetWelcomeText();
+
+            // Set the current date
+            DateTextBlock.Text = DateTime.Now.ToString("dddd MMMM dd, yyyy");
+
+            // Load Dashboard Data (e.g., total patients and available doctors)
+            LoadDashboardDataCounts();
+        }
+
+        // Method to load dashboard counts (Total Patients and Doctors)
+        private void LoadDashboardDataCounts()
+        {
+            string totalPatients = GetTotalPatientsCount();  // Fetch from the backend (database)
+            TotalPatientsTextBlock.Text = "Total Patients: " + totalPatients;
+
+            string availableDoctors = GetAvailableDoctorsCount();  // Fetch from the backend (database)
             AvailableDoctorsTextBlock.Text = "Total Doctors: " + availableDoctors;
         }
 
-        private string GetAvailableDoctorsCount()
+        // Method to fetch the total number of patients
+        private string GetTotalPatientsCount()
         {
-            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString)) 
+            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
             {
                 try
                 {
                     conn.Open();
-                    // Query to count doctors with role 'Doctor' (assuming availability is defined in the role itself or another flag)
+                    string query = "SELECT COUNT(*) FROM Patients"; // Example query
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        return cmd.ExecuteScalar().ToString(); // Returns the total count of patients
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error fetching patient count: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return "0"; // In case of error, return 0
+                }
+            }
+        }
+
+        // Method to fetch the total number of doctors
+        private string GetAvailableDoctorsCount()
+        {
+            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                try
+                {
+                    conn.Open();
                     string query = "SELECT COUNT(*) FROM Users WHERE Role = 'Doctor'"; // Example query for doctors
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -94,9 +91,6 @@ namespace ElizadeEHR
                 }
             }
         }
-
-
-
         private void ProfileImage_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
@@ -141,7 +135,7 @@ namespace ElizadeEHR
             }
         }
 
-        private void ProfileSection_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void ProfileSection_MouseDown(object sender, MouseButtonEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to log out?", "Logout Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
@@ -153,17 +147,154 @@ namespace ElizadeEHR
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void LoadProfilePicture()
         {
-            // Add any logic for button click if needed
+            if (!string.IsNullOrEmpty(App.ProfilePicturePath) && File.Exists(App.ProfilePicturePath))
+            {
+                ProfileImage.Source = new BitmapImage(new Uri(App.ProfilePicturePath));
+            }
+            else
+            {
+                // Optional: set a default profile image
+                ProfileImage.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/default-avatar.png"));
+            }
         }
 
-       
 
-        internal class DatabaseConfig
+        //private Button selectedButton;
+
+        private void SidebarButton_Click(object sender, RoutedEventArgs e)
         {
-            public static string ConnectionString = "server=localhost;database=campusehrconsole;user=root;password=joycedafe3225%;";
+            ResetSidebarSelection();
+
+            if (sender == DashboardButton)
+            {
+                DashboardButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+                DashboardText.Foreground = Brushes.White;
+                DashboardIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\Source\\Repos\\Elizade-Clinic-EHR\\white icons\\icons8-dashboard-24.png"));
+            }
+            else if (sender == DoctorButton)
+            {
+                DoctorButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+                DoctorText.Foreground = Brushes.White;
+                DoctorIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\Source\\Repos\\Elizade-Clinic-EHR\\white icons\\icons8-doctor-50.png"));
+            }
+            else if (sender == PatientButton)
+            {
+                PatientButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+                PatientText.Foreground = Brushes.White;
+                PatientIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\Source\\Repos\\Elizade-Clinic-EHR\\white icons\\icons8-patient-50.png"));
+            }
+            else if (sender == SettingsButton)
+            {
+                SettingsButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+                SettingsText.Foreground = Brushes.White;
+                SettingsIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\Source\\Repos\\Elizade-Clinic-EHR\\white icons\\icons8-settings-48.png"));
+            }
+            else if (sender == SupportButton)
+            {
+                SupportButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+                SupportText.Foreground = Brushes.White;
+                SupportIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\Source\\Repos\\Elizade-Clinic-EHR\\white icons\\icons8-customer-service-50 (1).png"));
+            }
         }
 
+        private void ResetSidebarSelection()
+        {
+            // Reset Dashboard
+            DashboardButton.Background = Brushes.White;
+            DashboardText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            DashboardIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/icons8-dashboard-48.png"));
+
+            // Reset Doctor
+            DoctorButton.Background = Brushes.White;
+            DoctorText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            DoctorIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/icons8-doctor-50.png"));
+
+            // Reset Patient
+            PatientButton.Background = Brushes.White;
+            PatientText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            PatientIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/icons8-patient-50.png"));
+
+            // Reset Settings
+            SettingsButton.Background = Brushes.White;
+            SettingsText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            SettingsIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/icons8-settings-50.png"));
+
+            // Reset Support
+            SupportButton.Background = Brushes.White;
+            SupportText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            SupportIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/icons8-support-50.png"));
+        }
+
+        // Set the welcome text after fetching last name
+        private void SetWelcomeText()
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+                {
+                    conn.Open();
+                    string query = "SELECT LastName FROM Users WHERE Email = @Email";
+
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Email", App.UserEmail);
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                string lastName = reader["LastName"].ToString();
+                                WelcomeTextBlock.Text = $"Welcome {lastName}";
+                            }
+                            else
+                            {
+                                WelcomeTextBlock.Text = "Welcome";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading welcome message: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                WelcomeTextBlock.Text = "Welcome";
+            }
+        }
+
+        // Event handler for Total Patients Button click
+        private void TotalPatientsButton_Click(object sender, RoutedEventArgs e)
+        {
+            DashboardDataGrid.Columns.Clear();
+
+            // Add columns for patient data
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "PatientID", Binding = new Binding("PatientID") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "LASTNAME", Binding = new Binding("LastName") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "FIRSTNAME", Binding = new Binding("FirstName") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "DATE OF BIRTH", Binding = new Binding("DateOfBirth") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "GENDER", Binding = new Binding("Gender") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "PHONE", Binding = new Binding("Phone") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "EMAIL", Binding = new Binding("Email") });
+
+            // Load patient data from the database
+            DashboardDataGrid.ItemsSource = DatabaseHelper.GetAllPatients(); // Use your actual data fetching method
+        }
+
+        // Event handler for Total Doctors Button click
+        private void TotalDoctorsButton_Click(object sender, RoutedEventArgs e)
+        {
+            DashboardDataGrid.Columns.Clear();
+
+            // Add columns for doctor data
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "DoctorID", Binding = new Binding("DoctorID") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "LASTNAME", Binding = new Binding("LastName") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "FIRSTNAME", Binding = new Binding("FirstName") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "GENDER", Binding = new Binding("Gender") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "PHONE", Binding = new Binding("Phone") });
+            DashboardDataGrid.Columns.Add(new DataGridTextColumn { Header = "EMAIL", Binding = new Binding("Email") });
+
+            // Load doctor data from the database
+            DashboardDataGrid.ItemsSource = DatabaseHelper.GetAllDoctors(); // Use your actual data fetching method
+        }
     }
 }

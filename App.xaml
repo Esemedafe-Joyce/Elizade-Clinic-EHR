@@ -10,6 +10,75 @@
         <Style TargetType="Button">
             <Setter Property="FontFamily" Value="/Fonts/#Poppins"/>
         </Style>
-    </Application.Resources>
 
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="50"/>
+            <!-- Ensure button has a consistent height -->
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                         BorderBrush="{TemplateBinding BorderBrush}"
+                         BorderThickness="0"
+                         CornerRadius="10" 
+                     Padding="10">
+                            <!-- Rounded corners -->
+                            <StackPanel Orientation="Horizontal">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                                <!-- Lighter gray on hover -->
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RoundedDashboardButtonStyle" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="BorderBrush" Value="#26547C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <!-- Transparent background -->
+            <Setter Property="Padding" Value="10,5"/>
+            <!-- Consistent padding -->
+            <Setter Property="Height" Value="50"/>
+            <!-- Fixed height for consistent button size -->
+            <Setter Property="FontFamily" Value="/Fonts/#Poppins"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="#26547C"/>
+            <!-- Default text color -->
+            <Setter Property="Cursor" Value="Hand"/>
+            <!-- Hand cursor on hover -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="8" 
+                        Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+
+
+    </Application.Resources>
 </Application>
+

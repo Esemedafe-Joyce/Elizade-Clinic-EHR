@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Windows;
 using System.Text.RegularExpressions;
-using MySql.Data.MySqlClient;
+//using MySql.Data.MySqlClient;
 using System.Windows.Media;
+using MySqlConnector;
 
 namespace ElizadeEHR
 {
@@ -37,7 +38,7 @@ namespace ElizadeEHR
             {
                 MessageBox.Show("Login successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                AdminDashboard adminDashboard = new AdminDashboard();
+                AdminDashboard adminDashboard = new AdminDashboard(App.UserName, App.UserEmail);
                 adminDashboard.Show();
                 this.Close();
             }
