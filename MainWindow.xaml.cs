@@ -37,6 +37,7 @@ namespace ElizadeEHR
             if (AuthenticateUser(username, password))
             {
                 MessageBox.Show("Login successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                DatabaseHelper.LogAction(App.UserID, "Logged in");
 
                 AdminDashboard adminDashboard = new AdminDashboard(App.UserName, App.UserEmail);
                 adminDashboard.Show();
@@ -67,7 +68,7 @@ namespace ElizadeEHR
                     string lastName = nameParts[0];
                     string firstName = nameParts[1];
 
-                    string query = "SELECT FirstName, LastName, Email, ProfilePicture FROM Users WHERE LastName = @lastName AND FirstName = @firstName AND PasswordHash = SHA2(@password, 256)";
+                    string query = "SELECT UserID,FirstName, LastName, Email, ProfilePicture FROM Users WHERE LastName = @lastName AND FirstName = @firstName AND PasswordHash = SHA2(@password, 256)";
 
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -79,6 +80,7 @@ namespace ElizadeEHR
                         {
                             if (reader.Read())
                             {
+                                App.UserID = reader.GetInt32("UserID");
                                 App.UserName = $"{reader["FirstName"]} {reader["LastName"]}";
                                 App.UserEmail = reader["Email"].ToString();
                                 App.ProfilePicturePath = reader["ProfilePicture"].ToString();
@@ -96,6 +98,15 @@ namespace ElizadeEHR
             return isAuthenticated;
         }
 
+        private void InputField_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                btnLogin_Click(sender, new RoutedEventArgs());
+            }
+        }
+
+
         private void txtUsername_GotFocus(object sender, RoutedEventArgs e)
         {
             if (txtUsername.Text == "lastname.firstname")
@@ -112,6 +123,11 @@ namespace ElizadeEHR
                 txtUsername.Text = "lastname.firstname";
                 txtUsername.Foreground = new SolidColorBrush(Colors.Gray);
             }
+        }
+
+        private void txtUsername_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+
         }
     }
 

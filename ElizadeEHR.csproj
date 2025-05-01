@@ -132,15 +132,17 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DatabaseHelper.cs" />
-    <Compile Include="Doctor.cs" />
+    <Compile Include="Helpers\AuditLog.cs" />
+    <Compile Include="Helpers\AuditLogger.cs" />
+    <Compile Include="Helpers\DatabaseHelper.cs" />
+    <Compile Include="Helpers\Users.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Patient.cs" />
+    <Compile Include="Helpers\Patient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

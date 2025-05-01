@@ -9,7 +9,7 @@
 
     <Window.Resources>
         <!-- Sidebar Button Style with Rounded Corners -->
-       
+
     </Window.Resources>
 
     <Grid>
@@ -44,7 +44,7 @@
                     <!-- Dashboard Button (Selected by Default) -->
                     <Button x:Name="DashboardButton" Style="{StaticResource SidebarButtonStyle}" Background="#26547C" Click="SidebarButton_Click">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image x:Name="DashboardIcon" Source="/Icons/icons8-dashboard-48.png" Width="22" Height="30" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                            <Image x:Name="DashboardIcon" Source="C:\Users\Joyce\source\repos\Elizade-Clinic-EHR\white icons\icons8-dashboard-24.png" Width="22" Height="30" Margin="10,0,10,0" VerticalAlignment="Center"/>
                             <TextBlock x:Name="DashboardText" Text="Dashboard" Foreground="White" VerticalAlignment="Center" FontSize="18"/>
                         </StackPanel>
                     </Button>
@@ -53,7 +53,7 @@
                     <Button x:Name="DoctorButton" Style="{StaticResource SidebarButtonStyle}" Click="SidebarButton_Click">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image x:Name="DoctorIcon" Source="/Icons/icons8-doctor-50.png" Width="24" Height="24" Margin="10,0,10,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="DoctorText" Text="Doctor" Foreground="#26547C" VerticalAlignment="Center" FontSize="18"/>
+                            <TextBlock x:Name="DoctorText" Text="Staffs" Foreground="#26547C" VerticalAlignment="Center" FontSize="18"/>
                         </StackPanel>
                     </Button>
 
@@ -126,21 +126,71 @@
             </StackPanel>
 
             <!-- Side by side boxes for Total Patients and Available Doctors -->
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Left">
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Center">
                 <Button x:Name="TotalPatientsButton" Click="TotalPatientsButton_Click"
-                Style="{StaticResource RoundedDashboardButtonStyle}" Margin="10">
-                    <TextBlock x:Name="TotalPatientsTextBlock" Text="Total Patients" FontSize="20" Foreground="#26547C"/>
+        Style="{StaticResource RoundedDashboardButtonStyle}" Margin="22">
+                    <TextBlock x:Name="TotalPatientsTextBlock" Text="Patients" FontSize="20" Foreground="#26547C"/>
                 </Button>
+
                 <Button x:Name="TotalDoctorsButton" Click="TotalDoctorsButton_Click"
-                Style="{StaticResource RoundedDashboardButtonStyle}" Margin="10">
-                    <TextBlock x:Name="AvailableDoctorsTextBlock" Text="Total Doctors" FontSize="20" Foreground="#26547C"/>
+        Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20">
+                    <TextBlock x:Name="AvailableDoctorsTextBlock" Text="Staffs" FontSize="20" Foreground="#26547C"/>
+                </Button>
+
+                <Button x:Name="ReportButton" Click="ReportButton_Click"
+        Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20">
+                    <TextBlock x:Name="ReportTextBlock" Text="Reports" FontSize="20" Foreground="#26547C"/>
                 </Button>
             </StackPanel>
 
-            <!-- Shared DataGrid -->
-            <DataGrid x:Name="DashboardDataGrid" AutoGenerateColumns="False"
-              HeadersVisibility="Column" Margin="40" FontSize="14"
-              IsReadOnly="True" CanUserAddRows="False" Grid.Row="2"/>
+
+            <DataGrid x:Name="DashboardDataGrid"
+                    AutoGenerateColumns="False"
+		            Visibility="Collapsed"
+		          HeadersVisibility="Column"
+		          Margin="40"
+		          FontSize="13"
+		          FontFamily="Poppins"
+		          IsReadOnly="True"
+		          CanUserAddRows="False"
+		          Grid.Row="2"
+		          Background="#F7FBFF"
+		          RowBackground="White"
+		          AlternatingRowBackground="#E5F0FA"
+		          GridLinesVisibility="All"
+		          BorderBrush="#D1D1D1"
+		          BorderThickness="1"
+		          SelectionMode="Single"
+		          SelectionUnit="FullRow"
+		          HorizontalAlignment="Stretch">        
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Padding" Value="5"/>
+                        <Setter Property="Background" Value="White"/>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Height" Value="40"/>
+                        <Setter Property="Padding" Value="10"/>
+                        <Setter Property="Background" Value="#26547C"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="FontSize" Value="14"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <!-- Custom Row Border Color -->
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="BorderBrush" Value="#D1D1D1" />
+                        <!-- Soft gray border color -->
+                    </Style>
+                </DataGrid.Resources>
+            </DataGrid>
         </Grid>
 
     </Grid>

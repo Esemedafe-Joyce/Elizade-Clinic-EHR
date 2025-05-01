@@ -13,8 +13,9 @@ namespace ElizadeEHR
     /// </summary>
     public partial class App : Application
     {
-            // Stores logged-in user details
-            public static string UserName { get; set; }
+        // Stores logged-in user details
+        public static int UserID { get; set; }
+        public static string UserName { get; set; }
             public static string UserEmail { get; set; }
             public static string ProfilePicturePath { get; set; } = "Images/default-profile.png"; // Default profile picture
 
