@@ -14,6 +14,12 @@ namespace ElizadeEHR
         public string Gender { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
-        public string Role { get; set; }  // Include role to distinguish between Doctor, Admin, etc.
+        public string Role { get; set; }            // Admin, Doctor, Nurse, etc.
+        public DateTime CreatedAt { get; set; }     // Account creation date
+        public string ProfilePicture { get; set; }  // Path to profile image
+        public string Password { get; set; }
+        public string PasswordHash { get; set; }
+
     }
+
 }

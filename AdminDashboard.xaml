@@ -50,7 +50,7 @@
                     </Button>
 
                     <!-- Doctor Button -->
-                    <Button x:Name="DoctorButton" Style="{StaticResource SidebarButtonStyle}" Click="SidebarButton_Click">
+                    <Button x:Name="StaffButton"  Style="{StaticResource SidebarButtonStyle}" Click="SidebarButton_Click" >
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image x:Name="DoctorIcon" Source="/Icons/icons8-doctor-50.png" Width="24" Height="24" Margin="10,0,10,0" VerticalAlignment="Center"/>
                             <TextBlock x:Name="DoctorText" Text="Staffs" Foreground="#26547C" VerticalAlignment="Center" FontSize="18"/>
@@ -109,89 +109,6 @@
         </Border>
 
         <!-- Main Content Area -->
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!-- StackPanel to hold Welcome Admin and Current Date -->
-            <StackPanel Grid.Row="0" Margin="10">
-                <!-- Welcome Admin Text -->
-                <TextBlock x:Name="WelcomeTextBlock" FontSize="40" HorizontalAlignment="Left" Margin="0,10,0,0"/>
-
-                <!-- Current Date -->
-                <TextBlock Name="DateTextBlock" FontSize="16" HorizontalAlignment="left" Foreground="#7F7F7F" Margin="0,5,0,0"/>
-            </StackPanel>
-
-            <!-- Side by side boxes for Total Patients and Available Doctors -->
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Center">
-                <Button x:Name="TotalPatientsButton" Click="TotalPatientsButton_Click"
-        Style="{StaticResource RoundedDashboardButtonStyle}" Margin="22">
-                    <TextBlock x:Name="TotalPatientsTextBlock" Text="Patients" FontSize="20" Foreground="#26547C"/>
-                </Button>
-
-                <Button x:Name="TotalDoctorsButton" Click="TotalDoctorsButton_Click"
-        Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20">
-                    <TextBlock x:Name="AvailableDoctorsTextBlock" Text="Staffs" FontSize="20" Foreground="#26547C"/>
-                </Button>
-
-                <Button x:Name="ReportButton" Click="ReportButton_Click"
-        Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20">
-                    <TextBlock x:Name="ReportTextBlock" Text="Reports" FontSize="20" Foreground="#26547C"/>
-                </Button>
-            </StackPanel>
-
-
-            <DataGrid x:Name="DashboardDataGrid"
-                    AutoGenerateColumns="False"
-		            Visibility="Collapsed"
-		          HeadersVisibility="Column"
-		          Margin="40"
-		          FontSize="13"
-		          FontFamily="Poppins"
-		          IsReadOnly="True"
-		          CanUserAddRows="False"
-		          Grid.Row="2"
-		          Background="#F7FBFF"
-		          RowBackground="White"
-		          AlternatingRowBackground="#E5F0FA"
-		          GridLinesVisibility="All"
-		          BorderBrush="#D1D1D1"
-		          BorderThickness="1"
-		          SelectionMode="Single"
-		          SelectionUnit="FullRow"
-		          HorizontalAlignment="Stretch">        
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <Setter Property="Padding" Value="5"/>
-                        <Setter Property="Background" Value="White"/>
-                    </Style>
-                </DataGrid.RowStyle>
-
-                <DataGrid.ColumnHeaderStyle>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Height" Value="40"/>
-                        <Setter Property="Padding" Value="10"/>
-                        <Setter Property="Background" Value="#26547C"/>
-                        <Setter Property="Foreground" Value="White"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
-                        <Setter Property="FontSize" Value="14"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                        <Setter Property="VerticalContentAlignment" Value="Center"/>
-                    </Style>
-                </DataGrid.ColumnHeaderStyle>
-
-                <!-- Custom Row Border Color -->
-                <DataGrid.Resources>
-                    <Style TargetType="DataGridCell">
-                        <Setter Property="BorderBrush" Value="#D1D1D1" />
-                        <!-- Soft gray border color -->
-                    </Style>
-                </DataGrid.Resources>
-            </DataGrid>
-        </Grid>
-
+        <ContentControl x:Name="MainContentControl" Grid.Column="1"/>
     </Grid>
 </Window>

@@ -17,7 +17,8 @@ namespace ElizadeEHR
         public static int UserID { get; set; }
         public static string UserName { get; set; }
             public static string UserEmail { get; set; }
-            public static string ProfilePicturePath { get; set; } = "Images/default-profile.png"; // Default profile picture
+        public static string UserRole { get; set; }
+        public static string ProfilePicturePath { get; set; } = "Images/default-profile.png"; // Default profile picture
 
             /// <summary>
             /// Resets user session data (useful when logging out)

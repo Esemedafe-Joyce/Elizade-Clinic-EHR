@@ -5,7 +5,7 @@
         WindowState="Maximized"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Background="#265474">
+        Background="#26547C">
 
     <Grid>
         <!-- Centering Structure -->
@@ -98,7 +98,7 @@
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
-                            <Setter Property="Background" Value="#264653"/>
+                            <Setter Property="Background" Value="#26547C"/>
                             <!-- Default color -->
                         </Style>
                     </Button.Style>
@@ -108,7 +108,8 @@
            FontSize="12"
            Visibility="Collapsed"
            TextAlignment="Center"
-           Margin="0,0,0,0"/>
+                          
+           Margin="0,5,0,5"/>
 
             </StackPanel>
         </Border>

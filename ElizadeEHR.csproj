@@ -4,6 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <ProjectGuid>{7CC8C1EF-B204-49B8-AC0E-BA005BA58512}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>ElizadeEHR</RootNamespace>
@@ -117,9 +118,34 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DoctorDashboard.xaml.cs">
+      <DependentUpon>DoctorDashboard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DoctorDashboardHomePage.xaml.cs">
+      <DependentUpon>DoctorDashboardHomePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="NullToVisibilityConverter.cs" />
+    <Compile Include="StaffEditWindow.xaml.cs">
+      <DependentUpon>StaffEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StaffPage.xaml.cs">
+      <DependentUpon>StaffPage.xaml</DependentUpon>
+    </Compile>
     <Page Include="AdminDashboard.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DashboardHomePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DoctorDashboard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DoctorDashboardHomePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -132,6 +158,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DashboardHomePage.xaml.cs">
+      <DependentUpon>DashboardHomePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\AuditLog.cs" />
     <Compile Include="Helpers\AuditLogger.cs" />
     <Compile Include="Helpers\DatabaseHelper.cs" />
@@ -140,6 +169,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="StaffEditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="StaffPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\Patient.cs" />
@@ -160,7 +197,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="packages.config" />
     <Resource Include="Fonts\Poppins-Black.ttf" />
     <Resource Include="Fonts\Poppins-BlackItalic.ttf" />
     <Resource Include="Fonts\Poppins-Bold.ttf" />
@@ -179,6 +215,7 @@
     <Resource Include="Fonts\Poppins-SemiBoldItalic.ttf" />
     <Resource Include="Fonts\Poppins-Thin.ttf" />
     <Resource Include="Fonts\Poppins-ThinItalic.ttf" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -213,7 +250,9 @@
     <Resource Include="white icons\icons8-settings-48.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Icons\icons8-search-50.png" />
     <Content Include="users.sql" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

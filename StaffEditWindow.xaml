@@ -1,0 +1,227 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:av="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        mc:Ignorable="av" x:Class="ElizadeEHR.StaffEditWindow"
+        Title="Staff Edit" Height="400" Width="500" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid>
+        <StackPanel Margin="20">
+            <!-- First Name and Last Name side by side -->
+            <Grid Margin="0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <!-- Spacing between columns -->
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- First Name -->
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="FirstNameTextBox"
+                         FontFamily="Poppins"
+                         FontSize="13"
+                         Padding="5"
+                         VerticalContentAlignment="Center"
+                         TextChanged="FirstNameTextBox_TextChanged"/>
+                    <TextBlock x:Name="FirstNamePlaceholder"
+                           Text="First Name"
+                           Foreground="#888"
+                           FontFamily="Poppins"
+                           FontSize="13"
+                           Margin="10,0,0,0"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False"
+                           Visibility="Visible"/>
+                </Grid>
+
+                <!-- Last Name -->
+                <Grid Grid.Column="2">
+                    <TextBox x:Name="LastNameTextBox"
+                         FontFamily="Poppins"
+                         FontSize="13"
+                         Padding="5"
+                         VerticalContentAlignment="Center"
+                         TextChanged="LastNameTextBox_TextChanged"/>
+                    <TextBlock x:Name="LastNamePlaceholder"
+                           Text="Last Name"
+                           Foreground="#888"
+                           FontFamily="Poppins"
+                           FontSize="13"
+                           Margin="10,0,0,0"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False"
+                           Visibility="Visible"/>
+                </Grid>
+            </Grid>
+
+            <!-- Email -->
+            <Grid Margin="0,10">
+                <TextBox x:Name="EmailTextBox"
+                     FontFamily="Poppins"
+                     FontSize="13"
+                     Padding="5"
+                     VerticalContentAlignment="Center"
+                     TextChanged="EmailTextBox_TextChanged"/>
+                <TextBlock x:Name="EmailPlaceholder"
+                       Text="Email"
+                       Foreground="#888"
+                       FontFamily="Poppins"
+                       FontSize="13"
+                       Margin="10,0,0,0"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Visibility="Visible"/>
+            </Grid>
+
+            <!-- Phone Number -->
+            <Grid Margin="0,10">
+                <TextBox x:Name="PhoneTextBox"
+                     FontFamily="Poppins"
+                     FontSize="13"
+                     Padding="5"
+                     VerticalContentAlignment="Center"
+                     TextChanged="PhoneTextBox_TextChanged"
+                     PreviewTextInput="PhoneTextBox_PreviewTextInput"/>
+                <TextBlock x:Name="PhonePlaceholder"
+                       Text="Phone Number"
+                       Foreground="#888"
+                       FontFamily="Poppins"
+                       FontSize="13"
+                       Margin="10,0,0,0"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Visibility="Visible"/>
+            </Grid>
+
+            <!-- Password -->
+            <Grid Margin="0,10">
+                <TextBox x:Name="PasswordTextBox"
+                     FontFamily="Poppins"
+                     FontSize="13"
+                     Padding="5"
+                     VerticalContentAlignment="Center"
+                     TextChanged="PasswordTextBox_TextChanged"/>
+                <TextBlock x:Name="PasswordPlaceholder"
+                       Text="Password"
+                       Foreground="#888"
+                       FontFamily="Poppins"
+                       FontSize="13"
+                       Margin="10,0,0,0"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Visibility="Visible"/>
+            </Grid>
+
+            <!-- Role and Gender ComboBoxes side by side -->
+            <Grid Margin="0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <!-- Spacing between columns -->
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Role ComboBox -->
+                <ComboBox Grid.Column="0" 
+                      x:Name="RoleComboBox"
+                      Height="30"
+                      Foreground="White"
+                      Background="#FF26547C"
+                      BorderBrush="#26547C"
+                      BorderThickness="0"
+                      Padding="10,0"
+                      VerticalContentAlignment="Center"
+                      SelectionChanged="RoleComboBox_SelectionChanged"
+                      Style="{StaticResource RoundedComboBoxStyle}">
+                    <ComboBoxItem Content="Role" IsSelected="True" IsEnabled="False"/>
+                    <ComboBoxItem Content="Admin"/>
+                    <ComboBoxItem Content="Doctor"/>
+                </ComboBox>
+
+                <!-- Gender ComboBox -->
+                <ComboBox Grid.Column="2" 
+                      x:Name="GenderComboBox"
+                      Height="30"
+                      Foreground="White"
+                      Background="#FF26547C"
+                      BorderBrush="#26547C"
+                      BorderThickness="0"
+                      Padding="10,0"
+                      VerticalContentAlignment="Center"
+                      SelectionChanged="GenderComboBox_SelectionChanged"
+                      Style="{StaticResource RoundedComboBoxStyle}">
+                    <ComboBoxItem Content="Gender" IsSelected="True" IsEnabled="False"/>
+                    <ComboBoxItem Content="Male"/>
+                    <ComboBoxItem Content="Female"/>
+                </ComboBox>
+            </Grid>
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button Content="Save" Width="100" Margin="10,0" Click="SaveButton_Click" Foreground="White">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="8"
+                                                Padding="5"
+                                                >
+                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                              VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#2E5665"/>
+                                                <!-- 5% Brighter -->
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#1E3D4A"/>
+                                                <!-- Slightly Darker when clicked -->
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Background" Value="#26547C"/>
+                            <!-- Default color -->
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="Cancel" Width="100" Margin="10,0" Click="CancelButton_Click" Foreground="White">
+                    <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" 
+                                              CornerRadius="8"
+                                              Padding="5"
+                                              >
+                                        <ContentPresenter HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#2E5665"/>
+                                            <!-- 5% Brighter -->
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" Value="#1E3D4A"/>
+                                            <!-- Slightly Darker when clicked -->
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Background" Value="#26547C"/>
+                        <!-- Default color -->
+                    </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

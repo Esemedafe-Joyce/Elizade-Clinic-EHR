@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 //using MySql.Data.MySqlClient;
 using System.Windows.Media;
 using MySqlConnector;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace ElizadeEHR
 {
@@ -36,24 +37,29 @@ namespace ElizadeEHR
 
             if (AuthenticateUser(username, password))
             {
-                MessageBox.Show("Login successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 DatabaseHelper.LogAction(App.UserID, "Logged in");
 
-                AdminDashboard adminDashboard = new AdminDashboard(App.UserName, App.UserEmail);
-                adminDashboard.Show();
+                if (App.UserRole == "Admin")
+                {
+                    AdminDashboard adminDashboard = new AdminDashboard(App.UserName, App.UserEmail);
+                    adminDashboard.Show();
+                }
+                else if (App.UserRole == "Doctor")
+                {
+                    DoctorDashboard doctorDashboard = new DoctorDashboard(App.UserName, App.UserEmail);
+                    doctorDashboard.Show();
+                }
+                else
+                {
+                    MessageBox.Show($"No dashboard implemented for role: {App.UserRole}", "Unknown Role", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 this.Close();
             }
-            else
-            {
-                ShowErrorMessage("Invalid username or password.");
-            }
+
         }
 
-        private void ShowErrorMessage(string message)
-        {
-            lblErrorMessage.Text = message;
-            lblErrorMessage.Visibility = Visibility.Visible;
-        }
 
         private bool AuthenticateUser(string username, string password)
         {
@@ -68,7 +74,7 @@ namespace ElizadeEHR
                     string lastName = nameParts[0];
                     string firstName = nameParts[1];
 
-                    string query = "SELECT UserID,FirstName, LastName, Email, ProfilePicture FROM Users WHERE LastName = @lastName AND FirstName = @firstName AND PasswordHash = SHA2(@password, 256)";
+                    string query = "SELECT UserID,FirstName, LastName, Email, ProfilePicture, Role FROM Users WHERE LastName = @lastName AND FirstName = @firstName AND PasswordHash = SHA2(@password, 256)";
 
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -84,8 +90,10 @@ namespace ElizadeEHR
                                 App.UserName = $"{reader["FirstName"]} {reader["LastName"]}";
                                 App.UserEmail = reader["Email"].ToString();
                                 App.ProfilePicturePath = reader["ProfilePicture"].ToString();
+                                App.UserRole = reader["Role"].ToString(); // <-- store role here
                                 isAuthenticated = true;
                             }
+
                         }
                     }
                 }
@@ -96,6 +104,11 @@ namespace ElizadeEHR
             }
 
             return isAuthenticated;
+        }
+        private void ShowErrorMessage(string message)
+        {
+            lblErrorMessage.Text = message;
+            lblErrorMessage.Visibility = Visibility.Visible;
         }
 
         private void InputField_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
