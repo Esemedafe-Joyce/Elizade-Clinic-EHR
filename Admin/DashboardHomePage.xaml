@@ -33,12 +33,12 @@
 
             <Button x:Name="TotalDoctorsButton" Click="TotalDoctorsButton_Click"
                     Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20">
-                <TextBlock x:Name="AvailableDoctorsTextBlock" Text="Staffs" FontSize="20" Foreground="#26547C"/>
+                <TextBlock x:Name="AvailableDoctorsTextBlock" Text="Staff" FontSize="20" Foreground="#26547C"/>
             </Button>
 
             <Button x:Name="ReportButton" Click="ReportButton_Click"
                     Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20">
-                <TextBlock x:Name="ReportTextBlock" Text="Reports" FontSize="20" Foreground="#26547C"/>
+                <TextBlock x:Name="ReportTextBlock" Text="Logs" FontSize="20" Foreground="#26547C"/>
             </Button>
         </StackPanel>
 

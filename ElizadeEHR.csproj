@@ -118,26 +118,39 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Admin\patients\PatientEditWindow.xaml.cs">
+      <DependentUpon>PatientEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\patients\PatientPage.xaml.cs">
+      <DependentUpon>PatientPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DoctorDashboard.xaml.cs">
       <DependentUpon>DoctorDashboard.xaml</DependentUpon>
     </Compile>
     <Compile Include="DoctorDashboardHomePage.xaml.cs">
       <DependentUpon>DoctorDashboardHomePage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="NullToVisibilityConverter.cs" />
-    <Compile Include="StaffEditWindow.xaml.cs">
+    <Compile Include="Admin\Staff\StaffEditWindow.xaml.cs">
       <DependentUpon>StaffEditWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="StaffPage.xaml.cs">
+    <Compile Include="Admin\Staff\StaffPage.xaml.cs">
       <DependentUpon>StaffPage.xaml</DependentUpon>
     </Compile>
-    <Page Include="AdminDashboard.xaml">
+    <Page Include="Admin\AdminDashboard.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="DashboardHomePage.xaml">
+    <Page Include="Admin\DashboardHomePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Admin\patients\PatientEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Admin\patients\PatientPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="DoctorDashboard.xaml">
       <SubType>Designer</SubType>
@@ -151,14 +164,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="AdminDashboard.xaml.cs">
+    <Compile Include="Admin\AdminDashboard.xaml.cs">
       <DependentUpon>AdminDashboard.xaml</DependentUpon>
     </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DashboardHomePage.xaml.cs">
+    <Compile Include="Admin\DashboardHomePage.xaml.cs">
       <DependentUpon>DashboardHomePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\AuditLog.cs" />
@@ -169,11 +182,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="StaffEditWindow.xaml">
+    <Page Include="Admin\Staff\StaffEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="StaffPage.xaml">
+    <Page Include="Admin\Staff\StaffPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

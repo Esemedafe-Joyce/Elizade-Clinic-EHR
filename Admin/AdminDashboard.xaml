@@ -53,7 +53,7 @@
                     <Button x:Name="StaffButton"  Style="{StaticResource SidebarButtonStyle}" Click="SidebarButton_Click" >
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image x:Name="DoctorIcon" Source="/Icons/icons8-doctor-50.png" Width="24" Height="24" Margin="10,0,10,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="DoctorText" Text="Staffs" Foreground="#26547C" VerticalAlignment="Center" FontSize="18"/>
+                            <TextBlock x:Name="DoctorText" Text="Staff" Foreground="#26547C" VerticalAlignment="Center" FontSize="18"/>
                         </StackPanel>
                     </Button>
 

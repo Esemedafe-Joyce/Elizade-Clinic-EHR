@@ -14,32 +14,37 @@ namespace ElizadeEHR
         public static List<Patient> GetAllPatients()
         {
             List<Patient> patients = new List<Patient>();
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
-            {
-                conn.Open();
-                string query = "SELECT PatientID, LastName, FirstName, DateOfBirth, Gender, Phone, Email FROM patients";
-                MySqlCommand cmd = new MySqlCommand(query, conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+
+
+                using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
                 {
-                    patients.Add(new Patient
+                    conn.Open();
+                string query = "SELECT PatientID, MatricNumber, LastName, FirstName, DateOfBirth, Gender, Phone, Email FROM patients";
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
                     {
-                        PatientID = reader.GetInt32("PatientID"),
-                        LastName = reader.GetString("LastName"),
-                        FirstName = reader.GetString("FirstName"),
-                        DateOfBirth = reader.GetDateTime("DateOfBirth"),
-                        Gender = reader.GetString("Gender"),
-                        Phone = reader.GetString("Phone"),
-                        Email = reader.GetString("Email")
-                    });
+                        patients.Add(new Patient
+                        {
+                            PatientID = reader.GetInt32("PatientID"),
+                            MatricNumber = reader.IsDBNull(reader.GetOrdinal("MatricNumber")) ? null : reader.GetString("MatricNumber"),
+                            LastName = reader.GetString("LastName"),
+                            FirstName = reader.GetString("FirstName"),
+                            DateOfBirth = reader.GetDateTime("DateOfBirth"),
+                            Gender = reader.GetString("Gender"),
+                            Phone = reader.GetString("Phone"),
+                            Email = reader.GetString("Email"),
+                        });
+                    }
                 }
-            }
+            
             return patients;
         }
         public static List<User> GetAllUsers()
         {
             List<User> users = new List<User>();
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
             {
                 conn.Open();
                 string query = @"
@@ -70,18 +75,19 @@ namespace ElizadeEHR
         public static List<AuditLog> GetAllAuditLogs()
         {
             List<AuditLog> logs = new List<AuditLog>();
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
             {
                 conn.Open();
                 string query = @"
-            SELECT 
-                a.LogID,
-                a.UserID,
-                CONCAT(u.LastName, ' ', u.FirstName) AS UserFullName,
-                a.Action,
-                a.Timestamp
-            FROM AuditLogs a
-            INNER JOIN Users u ON a.UserID = u.UserID";
+                SELECT 
+                    a.LogID,
+                    a.UserID,
+                    CONCAT(u.LastName, ' ', u.FirstName) AS UserFullName,
+                    a.Action,
+                    a.Timestamp
+                FROM AuditLogs a
+                INNER JOIN Users u ON a.UserID = u.UserID
+                ORDER BY a.Timestamp DESC";
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 MySqlDataReader reader = cmd.ExecuteReader();
@@ -101,45 +107,9 @@ namespace ElizadeEHR
         }
 
 
-        public static List<User> GetAllUsers(bool includeProfile = false)
-        {
-            var users = new List<User>();
-            var conn = new MySqlConnection(connectionString);
-            conn.Open();
-
-            string select = includeProfile
-                ? "SELECT * FROM Users ORDER BY CreatedAt DESC"
-                : "SELECT UserID, LastName, FirstName, Email, Role, Gender, Phone FROM Users";
-
-            var cmd = new MySqlCommand(select, conn);
-            var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                var u = new User
-                {
-                    UserID = reader.GetInt32("UserID"),
-                    LastName = reader.GetString("LastName"),
-                    FirstName = reader.GetString("FirstName"),
-                    Email = reader.GetString("Email"),
-                    Role = reader.GetString("Role"),
-                    Gender = reader.GetString("Gender"),
-                    Phone = reader.GetString("Phone")
-                };
-
-                if (includeProfile)
-                {
-                    u.CreatedAt = reader.GetDateTime("CreatedAt");
-                    u.ProfilePicture = reader.GetString("ProfilePicture");
-                }
-
-                users.Add(u);
-            }
-            return users;
-        }
-
         public static void DeleteUser(int userId)
         {
-            var conn = new MySqlConnection(connectionString);
+            var conn = new MySqlConnection(DatabaseConfig.ConnectionString);
             conn.Open();
             string query = "DELETE FROM Users WHERE UserID = @id";
             var cmd = new MySqlCommand(query, conn);
@@ -167,7 +137,7 @@ namespace ElizadeEHR
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
                 {
                     conn.Open();
                     string query = @"
@@ -197,7 +167,7 @@ namespace ElizadeEHR
         }
         public static bool UpdateUser(User user)
         {
-            using (var conn = new MySqlConnection(connectionString))
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
             {
                 conn.Open();
                 string query = user.PasswordHash != null
@@ -220,5 +190,76 @@ namespace ElizadeEHR
             }
         }
 
+        public static bool SavePatient(Patient patient)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString ))
+                {
+                    conn.Open();
+                    string query = @"
+                    INSERT INTO Patients 
+                    (LastName, FirstName, Gender, Phone, Email, DateOfBirth, MatricNumber) 
+                    VALUES 
+                    (@LastName, @FirstName, @Gender, @Phone, @Email, @DateOfBirth, @MatricNumber)";
+
+
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@LastName", patient.LastName);
+                    cmd.Parameters.AddWithValue("@FirstName", patient.FirstName);
+                    cmd.Parameters.AddWithValue("@Gender", patient.Gender);
+                    cmd.Parameters.AddWithValue("@Phone", patient.Phone);
+                    cmd.Parameters.AddWithValue("@MatricNumber", patient.MatricNumber);
+                    cmd.Parameters.AddWithValue("@Email", patient.Email);
+                    cmd.Parameters.AddWithValue("@DateOfBirth", patient.DateOfBirth);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Database Error: {ex.Message}");
+                return false;
+            }
+        }
+        public static bool UpdatePatient(Patient patient)
+        {
+            try
+            {
+                using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+                {
+                    conn.Open();
+                    string query = "UPDATE Patients SET FirstName=@FirstName, LastName=@LastName, Email=@Email, Phone=@Phone, Gender=@Gender, DateOfBirth=@DateOfBirth, MatricNumber=@MatricNumber WHERE PatientID=@PatientID";
+
+                    var cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@FirstName", patient.FirstName);
+                    cmd.Parameters.AddWithValue("@LastName", patient.LastName);
+                    cmd.Parameters.AddWithValue("@Email", patient.Email);
+                    cmd.Parameters.AddWithValue("@Phone", patient.Phone);
+                    cmd.Parameters.AddWithValue("@Gender", patient.Gender);
+                    cmd.Parameters.AddWithValue("@MatricNumber", patient.MatricNumber);
+                    cmd.Parameters.AddWithValue("@DateOfBirth", patient.DateOfBirth);
+                    cmd.Parameters.AddWithValue("@PatientID", patient.PatientID); // ✅ Critical
+
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to update patient: " + ex.Message);
+                return false;
+            }
+        }
+
+        public static void DeletePatient(int patientId)
+        {
+            var conn = new MySqlConnection(DatabaseConfig.ConnectionString);
+            conn.Open();
+            string query = "DELETE FROM Patients WHERE PatientId = @id";
+            var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@id", patientId);
+            cmd.ExecuteNonQuery();
+        }
     }
 }

@@ -135,6 +135,7 @@ namespace ElizadeEHR
                 PatientButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
                 PatientText.Foreground = Brushes.White;
                 PatientIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\Source\\Repos\\Elizade-Clinic-EHR\\white icons\\icons8-patient-50.png"));
+                MainContentControl.Content = new PatientPage();
             }
             else if (sender == SettingsButton)
             {
