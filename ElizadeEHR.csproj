@@ -124,10 +124,10 @@
     <Compile Include="Admin\patients\PatientPage.xaml.cs">
       <DependentUpon>PatientPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DoctorDashboard.xaml.cs">
+    <Compile Include="Doctor\DoctorDashboard.xaml.cs">
       <DependentUpon>DoctorDashboard.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DoctorDashboardHomePage.xaml.cs">
+    <Compile Include="Doctor\DoctorDashboardHomePage.xaml.cs">
       <DependentUpon>DoctorDashboardHomePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Admin\Staff\StaffEditWindow.xaml.cs">
@@ -152,11 +152,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="DoctorDashboard.xaml">
+    <Page Include="Doctor\DoctorDashboard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DoctorDashboardHomePage.xaml">
+    <Page Include="Doctor\DoctorDashboardHomePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -176,6 +176,7 @@
     </Compile>
     <Compile Include="Helpers\AuditLog.cs" />
     <Compile Include="Helpers\AuditLogger.cs" />
+    <Compile Include="Helpers\DatabaseConfig.cs" />
     <Compile Include="Helpers\DatabaseHelper.cs" />
     <Compile Include="Helpers\Users.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -263,6 +264,15 @@
     <Resource Include="white icons\icons8-settings-48.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Icons\icons8-medical-records-50.png" />
+    <Resource Include="Icons\icons8-notes-50.png" />
+    <Resource Include="Icons\icons8-queue-50.png" />
+    <Resource Include="Icons\icons8-records-50.png" />
+    <Resource Include="Icons\icons8-treatment-50.png" />
+    <Resource Include="white icons\icons8-notes-50 %281%29.png" />
+    <Resource Include="white icons\icons8-queue-50 %281%29.png" />
+    <Resource Include="white icons\icons8-records-50 %281%29.png" />
+    <Resource Include="white icons\icons8-treatment-50 %281%29.png" />
     <Resource Include="Icons\icons8-search-50.png" />
     <Content Include="users.sql" />
   </ItemGroup>

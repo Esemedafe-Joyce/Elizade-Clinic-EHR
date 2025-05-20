@@ -63,5 +63,18 @@ namespace ElizadeEHR
                 WelcomeTextBlock.Text = "Welcome";
             }
         }
+
+        private void StartConsultationButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void PendingNotesButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void PatientsSeenTodayButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
