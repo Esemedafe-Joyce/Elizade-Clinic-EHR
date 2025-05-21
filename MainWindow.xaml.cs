@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Media;
 using MySqlConnector;
 using Org.BouncyCastle.Asn1.X509;
+using ElizadeEHR.Helpers;
 
 namespace ElizadeEHR
 {
@@ -93,6 +94,10 @@ namespace ElizadeEHR
                                 App.UserRole = reader["Role"].ToString(); // <-- store role here
                                 isAuthenticated = true;
                             }
+                            else
+                            {
+                                MessageBox.Show("Incorrect Username Or Password");
+                            }
 
                         }
                     }
@@ -142,10 +147,5 @@ namespace ElizadeEHR
         {
 
         }
-    }
-
-    internal class DatabaseConfig
-    {
-        public static string ConnectionString = "server=localhost;database=campusehrconsole;user=root;password=joycedafe3225%;";
     }
 }

@@ -124,6 +124,9 @@
     <Compile Include="Admin\patients\PatientPage.xaml.cs">
       <DependentUpon>PatientPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Doctor\ConsultationPage.xaml.cs">
+      <DependentUpon>ConsultationPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Doctor\DoctorDashboard.xaml.cs">
       <DependentUpon>DoctorDashboard.xaml</DependentUpon>
     </Compile>
@@ -152,11 +155,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Doctor\ConsultationPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Doctor\DoctorDashboard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Doctor\DoctorDashboardHomePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Doctor\PatientSelectionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -174,10 +185,15 @@
     <Compile Include="Admin\DashboardHomePage.xaml.cs">
       <DependentUpon>DashboardHomePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Doctor\PatientSelectionWindow.xaml.cs">
+      <DependentUpon>PatientSelectionWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\AuditLog.cs" />
     <Compile Include="Helpers\AuditLogger.cs" />
+    <Compile Include="Helpers\Consultation.cs" />
     <Compile Include="Helpers\DatabaseConfig.cs" />
     <Compile Include="Helpers\DatabaseHelper.cs" />
+    <Compile Include="Helpers\LabFile.cs" />
     <Compile Include="Helpers\Users.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

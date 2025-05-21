@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using ElizadeEHR.Helpers;
 using MySqlConnector;
 
 namespace ElizadeEHR
 {
     public class DatabaseHelper
     {
-        public static string connectionString = "server=localhost;database=campusehrconsole;user=root;password=joycedafe3225%;";
+        public static string connectionString = "server=localhost;database=campusehr;user=root;password=joycedafe3225%;";
         public static List<Patient> GetAllPatients()
         {
             List<Patient> patients = new List<Patient>();
@@ -261,5 +262,117 @@ namespace ElizadeEHR
             cmd.Parameters.AddWithValue("@id", patientId);
             cmd.ExecuteNonQuery();
         }
+        public static List<Patient> GetPendingPatientsForConsultation()
+        {
+            var patients = new List<Patient>();
+
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = @"
+            SELECT p.PatientID, p.FirstName, p.LastName, p.Phone, p.Gender, p.MatricNumber, p.Email, p.DateOfBirth
+            FROM patients p
+            LEFT JOIN consultations c ON p.PatientID = c.PatientID
+            WHERE c.ConsultationID IS NULL;
+        ";
+
+                using (var cmd = new MySqlCommand(query, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        patients.Add(new Patient
+                        {
+                            PatientID = reader.GetInt32("PatientID"),
+                            FirstName = reader.GetString("FirstName"),
+                            LastName = reader.GetString("LastName"),
+                            DateOfBirth = reader.GetDateTime("DateOfBirth"),
+                            Gender = reader.GetString("Gender"),
+                            MatricNumber = reader.IsDBNull(reader.GetOrdinal("MatricNumber")) ? null : reader.GetString("MatricNumber"),
+                            Email = reader.GetString("Email"),
+                            Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString("Phone")
+                        });
+                    }
+                }
+            }
+
+            return patients;
+        }
+
+        //public static int StartConsultation(int patientId, int doctorId)
+        //{
+        //    using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+        //    {
+        //        conn.Open();
+        //        string query = @"
+        //    INSERT INTO consultations (PatientID, DoctorID, StartTime, Status)
+        //    VALUES (@patientId, @doctorId, @startTime, 'Pending');
+        //    SELECT LAST_INSERT_ID();"; // Return the new ConsultationID
+
+        //        using (var cmd = new MySqlCommand(query, conn))
+        //        {
+        //            cmd.Parameters.AddWithValue("@patientId", patientId);
+        //            cmd.Parameters.AddWithValue("@doctorId", doctorId);
+        //            cmd.Parameters.AddWithValue("@startTime", DateTime.Now);
+
+        //            return Convert.ToInt32(cmd.ExecuteScalar()); // Return inserted ID if needed
+        //        }
+        //    }
+        //}
+
+        public static int SaveConsultationAndGetId(Consultation consultation)
+        {
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+
+                string query = @"
+            INSERT INTO consultations 
+                (PatientID, DoctorID, VisitReason, Diagnosis, Vitals, LabSummary, FollowUpRequired)
+            VALUES 
+                (@PatientID, @DoctorID, @VisitReason, @Diagnosis, @Vitals, @LabSummary, @FollowUpRequired);
+            SELECT LAST_INSERT_ID();";
+
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@PatientID", consultation.PatientID);
+                    cmd.Parameters.AddWithValue("@DoctorID", consultation.DoctorID);
+                    cmd.Parameters.AddWithValue("@VisitReason", consultation.VisitReason);
+                    cmd.Parameters.AddWithValue("@Diagnosis", consultation.Diagnosis ?? "");
+                    cmd.Parameters.AddWithValue("@Vitals", consultation.Vitals ?? "");
+                    cmd.Parameters.AddWithValue("@LabSummary", consultation.LabSummary ?? "");
+                    cmd.Parameters.AddWithValue("@FollowUpRequired", consultation.FollowUpRequired);
+
+                    object result = cmd.ExecuteScalar();
+                    return Convert.ToInt32(result);
+                }
+            }
+        }
+
+
+
+        public static void SaveLabFile(LabFile labFile)
+        {
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = @"
+            INSERT INTO lab_results (PatientID, ConsultationID, FileName, FilePath, UploadedBy)
+            VALUES (@PatientID, @ConsultationID, @FileName, @FilePath, @UploadedBy)";
+
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@PatientID", labFile.PatientID);
+                    cmd.Parameters.AddWithValue("@ConsultationID", labFile.ConsultationID);
+                    cmd.Parameters.AddWithValue("@FileName", labFile.FileName);
+                    cmd.Parameters.AddWithValue("@FilePath", labFile.FilePath);
+                    cmd.Parameters.AddWithValue("@UploadedBy", labFile.UploadedBy);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+
     }
 }

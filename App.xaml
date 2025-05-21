@@ -118,6 +118,7 @@
             <Setter Property="FontFamily" Value="Poppins"/>
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -260,7 +261,7 @@
                         <Setter Property="VerticalContentAlignment" Value="Center"/>
                         <Setter Property="Cursor" Value="Hand"/>
                         <Setter Property="Template">
-                            
+
                             <Setter.Value>
                                 <ControlTemplate TargetType="ComboBoxItem">
                                     <Border Name="Border"
@@ -285,6 +286,34 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="RoundedPrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#26547C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="5">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2E5665"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1E3D4A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Application.Resources>
 </Application>
 

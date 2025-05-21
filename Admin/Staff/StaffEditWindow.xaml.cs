@@ -19,7 +19,7 @@ namespace ElizadeEHR
 
         internal class DatabaseConfig
         {
-            public static string ConnectionString = "server=localhost;database=campusehrconsole;user=root;password=joycedafe3225%;";
+            public static string ConnectionString = "server=localhost;database=campusehr;user=root;password=joycedafe3225%;";
         }
         private User _userBeingEdited;
 

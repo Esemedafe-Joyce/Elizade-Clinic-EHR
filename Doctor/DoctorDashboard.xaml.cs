@@ -12,6 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ElizadeEHR.Doctor;
+using ElizadeEHR.Helpers;
 using Microsoft.Win32;
 using MySqlConnector;
 
@@ -28,7 +30,7 @@ namespace ElizadeEHR
             //LoadDashboardData(); // Call to load initial data on load
 
             LoadProfilePicture();
-            MainContentControl.Content = new DoctorDashboardHomePage();
+            MainContentControl.Content = new DoctorDashboardHomePage(this);
 
             //// Show the name and email in the UI
             NameTextBlock.Text = fullName;
@@ -177,7 +179,14 @@ namespace ElizadeEHR
             SettingsText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
             SettingsIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Icons/icons8-settings-50.png"));
         }
-      
+
+        public void LoadConsultationPage(Patient selectedPatient)
+        {
+            MainContentControl.Content = new Doctor.ConsultationPage(selectedPatient);
+        }
+
+
+
 
     }
 }

@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ElizadeEHR.Doctor;
+using ElizadeEHR.Helpers;
 using MySqlConnector;
 
 namespace ElizadeEHR
@@ -47,7 +49,7 @@ namespace ElizadeEHR
                             if (reader.Read())
                             {
                                 string lastName = reader["LastName"].ToString();
-                                WelcomeTextBlock.Text = $"Welcome {lastName}";
+                                WelcomeTextBlock.Text = $"Welcome Dr.{lastName}";
                             }
                             else
                             {
@@ -64,8 +66,23 @@ namespace ElizadeEHR
             }
         }
 
+        private DoctorDashboard _dashboard;
+
+        public DoctorDashboardHomePage(DoctorDashboard dashboard)
+        {
+            InitializeComponent();
+            _dashboard = dashboard;
+        }
+
+
         private void StartConsultationButton_Click(object sender, RoutedEventArgs e)
         {
+            var patientWindow = new PatientSelectionWindow();
+            if (patientWindow.ShowDialog() == true && patientWindow.SelectedPatient != null)
+            {
+                var selectedPatient = patientWindow.SelectedPatient;
+                _dashboard.LoadConsultationPage(selectedPatient); // Assuming you pass the patient object
+            }
 
         }
         private void PendingNotesButton_Click(object sender, RoutedEventArgs e)
@@ -76,5 +93,6 @@ namespace ElizadeEHR
         {
 
         }
+
     }
 }
