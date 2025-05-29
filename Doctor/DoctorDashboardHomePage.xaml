@@ -25,22 +25,23 @@
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Center">
             <Button x:Name="StartConsultationButton" Click="StartConsultationButton_Click"
                   Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20" Width="208">
-                <TextBlock Text="Start Consultation" FontSize="20" Foreground="#26547C"/>
+                <TextBlock x:Name="StartConsultationText" Text="Start Consultation" FontSize="20" Foreground="#26547C"/>
             </Button>
 
             <Button x:Name="PatientsSeenTodayButton" Click="PatientsSeenTodayButton_Click"
                   Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20">
-                <TextBlock Text="Seen Today" FontSize="20" Foreground="#26547C"/>
+                <TextBlock x:Name="PatientsSeenTodayText" Text="Seen Today" FontSize="20" Foreground="#26547C"/>
             </Button>
 
             <Button x:Name="PendingNotesButton" Click="PendingNotesButton_Click"
                   Style="{StaticResource RoundedDashboardButtonStyle}" Margin="20">
-                <TextBlock Text="Pending Notes" FontSize="20" Foreground="#26547C"/>
+                <TextBlock x:Name="PendingNotesText" Text="Pending Notes" FontSize="20" Foreground="#26547C"/>
             </Button>
         </StackPanel>
-
+                
         <!-- Data Grid for Current Patient Queue -->
         <DataGrid x:Name="DoctorDataGrid"
+ Visibility="Collapsed"
                 AutoGenerateColumns="False"
                 HeadersVisibility="Column"
                 Margin="40"
@@ -88,10 +89,23 @@
 
             <!-- Define Columns -->
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Queue No." Binding="{Binding QueueNumber}" Width="*" />
+                <DataGridTextColumn Header="Doctor" Binding="{Binding DoctorName}" Width="*" />
                 <DataGridTextColumn Header="Patient Name" Binding="{Binding PatientName}" Width="2*" />
                 <DataGridTextColumn Header="Arrival Time" Binding="{Binding ArrivalTime}" Width="*" />
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="*" />
+                <DataGridTextColumn Header="Departure Time" Binding="{Binding DepartureTime}" Width="*" />
+                <DataGridTextColumn Header="Consultation ID" Binding="{Binding ConsultationID}" Width="*" />
+
+                <!--<DataGridTemplateColumn Header="Action" Width="auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Open Record"
+                    Click="OpenRecordButton_Click"
+                    Style="{StaticResource RoundedPrimaryButtonStyle}"
+                    Tag="{Binding}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

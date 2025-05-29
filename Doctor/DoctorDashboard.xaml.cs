@@ -24,6 +24,8 @@ namespace ElizadeEHR
     /// </summary>
     public partial class DoctorDashboard : Window
     {
+        //private Patient selectedPatient;
+
         public DoctorDashboard(string fullName, string email)
         {
             InitializeComponent();
@@ -35,6 +37,14 @@ namespace ElizadeEHR
             //// Show the name and email in the UI
             NameTextBlock.Text = fullName;
             EmailTextBlock.Text = email;
+
+            //var consultPage = new Doctor.ConsultationPage(selectedPatient);
+            //consultPage.OnConsultationFinished += () =>
+            //{
+            //    MainContentControl.Content = new DashboardHomePage();
+            //};
+            //MainContentControl.Content = consultPage;
+
         }
         private void ProfileImage_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {

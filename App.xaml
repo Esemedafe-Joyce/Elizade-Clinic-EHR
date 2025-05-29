@@ -10,6 +10,7 @@
         <Style TargetType="TextBlock">
             <Setter Property="FontFamily" Value="/Fonts/#Poppins"/>
         </Style>
+        
         <Style TargetType="Button">
             <Setter Property="FontFamily" Value="/Fonts/#Poppins"/>
         </Style>
@@ -78,11 +79,12 @@
 
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <!-- Set corner radius here -->
+
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+        
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -109,6 +111,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
         <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#26547C"/>
@@ -292,7 +295,7 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
-                
+
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"

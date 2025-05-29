@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ElizadeEHR.Doctor"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             >
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="30" Orientation="Vertical" VerticalAlignment="Top" >
 
@@ -78,12 +78,39 @@
 
             <!-- Treatment Plan -->
             <GroupBox Header="Treatment Plan" FontSize="16" FontWeight="Bold" Margin="0,0,0,20">
-                <TextBox x:Name="TreatmentPlanBox" AcceptsReturn="True" Height="100" Margin="10"/>
+                <StackPanel Margin="10">
+                    <TextBox x:Name="TreatmentPlanBox" AcceptsReturn="True" Height="100" />
+                    <CheckBox x:Name="FollowUpCheckBox" Content="Follow-Up Required" Margin="0,10,0,0" FontWeight="SemiBold"/>
+                </StackPanel>
             </GroupBox>
+
 
             <!-- Prescription -->
             <GroupBox Header="Prescription" FontSize="16" FontWeight="Bold" Margin="0,0,0,20">
-                <TextBox x:Name="PrescriptionBox" AcceptsReturn="True" Height="100" Margin="10"/>
+                <DataGrid x:Name="PrescriptionDataGrid"
+              AutoGenerateColumns="False"
+              CanUserAddRows="True"
+              CanUserDeleteRows="True"
+              CanUserResizeColumns="False"
+              Height="200"
+              Margin="10"
+              HeadersVisibility="Column"
+              GridLinesVisibility="All"
+              ItemsSource="{Binding Prescriptions, Mode=TwoWay}"
+              IsReadOnly="False">
+
+                    <DataGrid.Columns>
+                        <!-- Editable Medication Name -->
+                        <DataGridTextColumn Header="Medication Name" Binding="{Binding MedicationName, Mode=TwoWay}" MinWidth="200"/>
+
+                        <!-- Editable Dosage -->
+                        <DataGridTextColumn Header="Dosage" Binding="{Binding Dosage, Mode=TwoWay}" MinWidth="200"/>
+
+                        <!-- Editable Instructions -->
+                        <DataGridTextColumn Header="Instructions" Binding="{Binding Instructions, Mode=TwoWay}" MinWidth="200"/>
+                    </DataGrid.Columns>
+
+                </DataGrid>
             </GroupBox>
 
             <!-- Optional Attachments -->
@@ -91,14 +118,16 @@
                 <StackPanel Margin="10">
                     <Button Content="Upload Lab File" Click="UploadFile_Click" Width="150" Margin="0,10,0,5" Style="{StaticResource ActionButtonStyle}"/>
                     <TextBlock x:Name="UploadedFileNameTextBlock"
-               Text="No file uploaded."
+               Text="No file uploaded. Files would be uploaded with every click."
                FontStyle="Italic" Foreground="Gray" />
                     <!-- Add ListView for uploaded files if needed -->
                 </StackPanel>
             </GroupBox>
 
             <!-- Save Button -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,10">
+                <Button Content="Saving Progress" Width="200" Height="40" Click="SaveProgressButton_Click"
+                      FontWeight="SemiBold" Style="{StaticResource RoundedPrimaryButtonStyle}" Cursor="Hand" Margin="0,0,20,0"/> 
                 <Button Content="Save &amp; End Consultation" Width="200" Height="40" Click="SaveButton_Click"
                       FontWeight="SemiBold" Style="{StaticResource RoundedPrimaryButtonStyle}" Cursor="Hand"/>
             </StackPanel>

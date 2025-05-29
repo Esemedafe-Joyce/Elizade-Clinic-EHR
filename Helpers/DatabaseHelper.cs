@@ -322,33 +322,36 @@ namespace ElizadeEHR
 
         public static int SaveConsultationAndGetId(Consultation consultation)
         {
+            int newId = 0;
             using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
             {
                 conn.Open();
-
-                string query = @"
-            INSERT INTO consultations 
-                (PatientID, DoctorID, VisitReason, Diagnosis, Vitals, LabSummary, FollowUpRequired)
+                string sql = @"
+            INSERT INTO Consultations 
+            (PatientID, DoctorID, VisitReason, Diagnosis, Vitals, LabSummary, FollowUpRequired, CreatedAt, IsCompleted, DepartureTime)
             VALUES 
-                (@PatientID, @DoctorID, @VisitReason, @Diagnosis, @Vitals, @LabSummary, @FollowUpRequired);
+            (@PatientID, @DoctorID, @VisitReason, @Diagnosis, @Vitals, @LabSummary, @FollowUpRequired, @CreatedAt, @IsCompleted, @DepartureTime);
             SELECT LAST_INSERT_ID();";
 
-                using (var cmd = new MySqlCommand(query, conn))
+                using (var cmd = new MySqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@PatientID", consultation.PatientID);
                     cmd.Parameters.AddWithValue("@DoctorID", consultation.DoctorID);
                     cmd.Parameters.AddWithValue("@VisitReason", consultation.VisitReason);
-                    cmd.Parameters.AddWithValue("@Diagnosis", consultation.Diagnosis ?? "");
-                    cmd.Parameters.AddWithValue("@Vitals", consultation.Vitals ?? "");
-                    cmd.Parameters.AddWithValue("@LabSummary", consultation.LabSummary ?? "");
+                    cmd.Parameters.AddWithValue("@Diagnosis", consultation.Diagnosis);
+                    cmd.Parameters.AddWithValue("@Vitals", consultation.Vitals);
+                    cmd.Parameters.AddWithValue("@LabSummary", (object)consultation.LabSummary ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@FollowUpRequired", consultation.FollowUpRequired);
+                    cmd.Parameters.AddWithValue("@CreatedAt", consultation.CreatedAt);
+                    cmd.Parameters.AddWithValue("@IsCompleted", consultation.IsCompleted);
+                    cmd.Parameters.AddWithValue("@DepartureTime", (object)consultation.DepartureTime ?? DBNull.Value);
 
-                    object result = cmd.ExecuteScalar();
-                    return Convert.ToInt32(result);
+                    // ExecuteScalar returns the first column of the first row in the result set
+                    newId = Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
+            return newId;
         }
-
 
 
         public static void SaveLabFile(LabFile labFile)
@@ -372,7 +375,34 @@ namespace ElizadeEHR
                 }
             }
         }
+        public static void SavePrescriptions(List<Prescription> prescriptions)
+        {
+            using (var connection = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                connection.Open();
 
+                foreach (var prescription in prescriptions)
+                {
+                    using (var command = new MySqlCommand(@"
+                INSERT INTO Prescriptions 
+                    (ConsultationID, PatientID, DoctorID, MedicationName, Dosage, Instructions, SentToPharmacy)
+                VALUES 
+                    (@ConsultationID, @PatientID, @DoctorID, @MedicationName, @Dosage, @Instructions, @SentToPharmacy)", connection))
+                    {
+                        command.Parameters.AddWithValue("@ConsultationID", prescription.ConsultationID);
+                        command.Parameters.AddWithValue("@PatientID", prescription.PatientID);
+                        command.Parameters.AddWithValue("@DoctorID", prescription.DoctorID);
+                        command.Parameters.AddWithValue("@MedicationName", prescription.MedicationName);
+                        command.Parameters.AddWithValue("@Dosage", prescription.Dosage);
+                        command.Parameters.AddWithValue("@Instructions", prescription.Instructions);
+                        command.Parameters.AddWithValue("@SentToPharmacy", false);
 
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
+       
     }
 }

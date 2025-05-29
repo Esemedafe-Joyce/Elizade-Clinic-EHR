@@ -19,6 +19,10 @@ namespace ElizadeEHR.Helpers
 
         public bool FollowUpRequired { get; set; }   // TRUE/FALSE toggle
         public DateTime CreatedAt { get; set; }      // Automatically set in DB
+
+        public bool IsCompleted { get; set; }
+        public DateTime? DepartureTime { get; set; }
+
     }
 
 }

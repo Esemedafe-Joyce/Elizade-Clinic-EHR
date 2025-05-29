@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ElizadeEHR.Helpers;
 using Microsoft.Win32;
+using Mysqlx.Session;
 
 namespace ElizadeEHR.Doctor
 {
@@ -26,10 +28,16 @@ namespace ElizadeEHR.Doctor
     {
         private Patient _selectedPatient;
 
+        public ObservableCollection<Prescription> Prescriptions { get; set; } = new ObservableCollection<Prescription>();
+
         public ConsultationPage(Patient selectedPatient)
         {
             InitializeComponent();
             _selectedPatient = selectedPatient;
+
+            this.DataContext = this; // Or your ViewModel
+            Prescriptions.Add(new Prescription()); // Optional: adds a blank row
+
 
             // Populate UI fields manually
             PatientFullNameTextBlock.Text = $"{_selectedPatient.FirstName} {_selectedPatient.LastName}";
@@ -85,6 +93,8 @@ namespace ElizadeEHR.Doctor
                     ConsultationID = currentConsultationId,
                     UploadedBy = App.UserID
                 });
+
+                DatabaseHelper.LogAction(App.UserID, "Uploaded a Lab File");
             }
         }
 
@@ -115,9 +125,87 @@ namespace ElizadeEHR.Doctor
                 e.CancelCommand();
             }
         }
+
+        //public event Action OnConsultationFinished;
+
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-
+            SaveConsultation(isCompleted: true);
+            //OnConsultationFinished?.Invoke();
         }
+
+        private void SaveProgressButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveConsultation(isCompleted: false);
+            //OnConsultationFinished?.Invoke();
+        }
+
+        private void SaveConsultation(bool isCompleted)
+        {
+            try
+            {
+                // Build the consultation object
+                var consultation = new Consultation
+                {
+                    PatientID = _selectedPatient.PatientID,
+                    DoctorID = App.UserID,
+                    VisitReason = VisitReasonTextBox.Text.Trim(),
+                    Diagnosis = new TextRange(DiagnosisBox.Document.ContentStart, DiagnosisBox.Document.ContentEnd).Text.Trim(),
+                    Vitals = $"Temp: {TempTextBox.Text.Trim()}, BP: {BpTextBox.Text.Trim()}, Weight: {WeightTextBox.Text.Trim()}",
+                    LabSummary = UploadedFileNameTextBlock.Text.Contains("Uploaded:") ? UploadedFileNameTextBlock.Text : null,
+                    FollowUpRequired = FollowUpCheckBox.IsChecked == true,
+                    CreatedAt = DateTime.Now, // Optional: only if manually setting it
+                };
+
+                // Set completion and departure time
+                if (isCompleted)
+                {
+                    consultation.IsCompleted = true;
+                    consultation.DepartureTime = DateTime.Now;
+                }
+                else
+                {
+                    consultation.IsCompleted = false;
+                    consultation.DepartureTime = null;
+                }
+
+                // Save consultation
+                int consultationId = DatabaseHelper.SaveConsultationAndGetId(consultation);
+
+                // Save prescriptions if any
+                var prescriptions = new List<Prescription>();
+                foreach (var prescription in PrescriptionDataGrid.Items.OfType<Prescription>())
+                {
+                    if (
+                        !string.IsNullOrWhiteSpace(prescription.MedicationName) &&
+                        !string.IsNullOrWhiteSpace(prescription.Dosage) &&
+                        !string.IsNullOrWhiteSpace(prescription.Instructions))
+                    {
+                        prescription.ConsultationID = consultationId;
+                        prescription.PatientID = _selectedPatient.PatientID;
+                        prescription.DoctorID = App.UserID;
+                        prescriptions.Add(prescription);
+                    }
+                }
+
+
+                if (prescriptions.Count > 0)
+                {
+                    DatabaseHelper.SavePrescriptions(prescriptions);
+                }
+
+                MessageBox.Show(isCompleted
+                    ? "Consultation completed successfully."
+                    : "Progress saved. You can complete the consultation later.",
+                    "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                DatabaseHelper.LogAction(App.UserID, $"{(isCompleted ? "Completed" : "Saved progress for")} consultation with {_selectedPatient.FirstName} {_selectedPatient.LastName}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving consultation: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
     }
 }

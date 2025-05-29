@@ -1,17 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ElizadeEHR.Doctor;
 using ElizadeEHR.Helpers;
 using MySqlConnector;
@@ -77,6 +68,11 @@ namespace ElizadeEHR
 
         private void StartConsultationButton_Click(object sender, RoutedEventArgs e)
         {
+            // Change the background and text color of the clicked button
+            StartConsultationButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            StartConsultationText.Foreground = Brushes.White;
+            ResetDashboardButtonSelection();
+
             var patientWindow = new PatientSelectionWindow();
             if (patientWindow.ShowDialog() == true && patientWindow.SelectedPatient != null)
             {
@@ -87,11 +83,43 @@ namespace ElizadeEHR
         }
         private void PendingNotesButton_Click(object sender, RoutedEventArgs e)
         {
-
+            // Change the background and text color of the clicked button
+            PendingNotesButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            PendingNotesText.Foreground = Brushes.White;
+            ResetDashboardButtonSelection();
         }
         private void PatientsSeenTodayButton_Click(object sender, RoutedEventArgs e)
         {
+            // Change the background and text color of the clicked button
+            PatientsSeenTodayButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            PatientsSeenTodayText.Foreground = Brushes.White;
 
+            DoctorDataGrid.Visibility = DoctorDataGrid.Visibility == Visibility.Visible
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            ResetDashboardButtonSelection();
+
+            //int doctorId = App.UserID; // or however you store the logged-in doctor ID
+            //var seenPatients = DatabaseHelper.GetPatientsSeenToday(doctorId);
+            //DoctorDataGrid.ItemsSource = seenPatients;
+        }
+
+
+
+
+        private void ResetDashboardButtonSelection()
+        {
+            // Reset StartConsultationButton
+            StartConsultationButton.Background = Brushes.White;
+            StartConsultationText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
+
+            // Reset PendingNotesButton
+            PendingNotesButton.Background = Brushes.White;
+            PendingNotesText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
+
+            // Reset PatientsSeenTodayButton
+            PatientsSeenTodayButton.Background = Brushes.White;
+            PatientsSeenTodayText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
         }
 
     }
