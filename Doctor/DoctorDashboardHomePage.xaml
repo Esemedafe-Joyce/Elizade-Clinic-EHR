@@ -94,18 +94,17 @@
                 <DataGridTextColumn Header="Arrival Time" Binding="{Binding ArrivalTime}" Width="*" />
                 <DataGridTextColumn Header="Departure Time" Binding="{Binding DepartureTime}" Width="*" />
                 <DataGridTextColumn Header="Consultation ID" Binding="{Binding ConsultationID}" Width="*" />
-
-                <!--<DataGridTemplateColumn Header="Action" Width="auto">
+                <!-- Add this column for editing -->
+                <DataGridTemplateColumn Header="Action" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="Open Record"
-                    Click="OpenRecordButton_Click"
-                    Style="{StaticResource RoundedPrimaryButtonStyle}"
-                    Tag="{Binding}" />
+                            <Button Content="Edit"
+                                    Click="EditPendingConsultation_Click"
+                                    Tag="{Binding ConsultationID}" 
+                                    Style="{StaticResource ActionButtonStyle}" Background="#26547C" Foreground="White"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>-->
-
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

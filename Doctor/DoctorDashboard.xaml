@@ -49,12 +49,12 @@
                     </Button>
 
                     <!-- Patient Queue -->
-                    <Button x:Name="PatientQueueButton" Style="{StaticResource SidebarButtonStyle}" Click="SidebarButton_Click">
+                    <!--<Button x:Name="PatientQueueButton" Style="{StaticResource SidebarButtonStyle}" Click="SidebarButton_Click">
                         <StackPanel Orientation="Horizontal">
                             <Image x:Name="QueueIcon" Source="/Icons/icons8-queue-50.png" Width="22" Height="30" Margin="10,0,10,0" VerticalAlignment="Center"/>
                             <TextBlock x:Name="PatientQueueText" Text="Patient Queue" Foreground="#26547C" FontSize="18" VerticalAlignment="Center"/>
                         </StackPanel>
-                    </Button>
+                    </Button>-->
 
                     <!-- Patient Records -->
                     <Button x:Name="PatientRecordsButton" Style="{StaticResource SidebarButtonStyle}" Click="SidebarButton_Click">

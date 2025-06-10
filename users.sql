@@ -30,6 +30,23 @@ CREATE TABLE Patients (
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Consultations table
+CREATE TABLE Consultations (
+    ConsultationID INT AUTO_INCREMENT PRIMARY KEY,
+    PatientID INT NOT NULL,
+    DoctorID INT NOT NULL,
+    VisitReason TEXT NOT NULL,
+    Diagnosis TEXT,
+    Vitals TEXT,
+    LabSummary TEXT,
+    FollowUpRequired BOOLEAN DEFAULT FALSE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	IsCompleted BOOLEAN DEFAULT FALSE,
+	DepartureTime DATETIME NULL,
+    FOREIGN KEY (PatientID) REFERENCES Patients(PatientID) ON DELETE CASCADE,
+    FOREIGN KEY (DoctorID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
 -- Prescriptions table with ConsultationID column added
 CREATE TABLE Prescriptions (
     PrescriptionID INT AUTO_INCREMENT PRIMARY KEY,
@@ -71,23 +88,6 @@ CREATE TABLE Notifications (
     IsRead BOOLEAN DEFAULT FALSE,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
-);
-
--- Consultations table
-CREATE TABLE Consultations (
-    ConsultationID INT AUTO_INCREMENT PRIMARY KEY,
-    PatientID INT NOT NULL,
-    DoctorID INT NOT NULL,
-    VisitReason TEXT NOT NULL,
-    Diagnosis TEXT,
-    Vitals TEXT,
-    LabSummary TEXT,
-    FollowUpRequired BOOLEAN DEFAULT FALSE,
-    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	IsCompleted BOOLEAN DEFAULT FALSE,
-	DepartureTime DATETIME NULL,
-    FOREIGN KEY (PatientID) REFERENCES Patients(PatientID) ON DELETE CASCADE,
-    FOREIGN KEY (DoctorID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 
 -- Lab results table

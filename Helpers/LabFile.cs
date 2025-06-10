@@ -8,7 +8,7 @@ namespace ElizadeEHR.Helpers
 {
     public class LabFile
     {
-        public int FileID { get; set; }
+        public int LabResultID { get; set; }
         public int PatientID { get; set; }
         public int ConsultationID { get; set; }
         public string FileName { get; set; }

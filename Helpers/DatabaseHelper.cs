@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace ElizadeEHR
 {
     public class DatabaseHelper
     {
-        public static string connectionString = "server=localhost;database=campusehr;user=root;password=joycedafe3225%;";
+        //public static string connectionString = "server=localhost;database=campusehr;user=root;password=joycedafe3225%;";
         public static List<Patient> GetAllPatients()
         {
             List<Patient> patients = new List<Patient>();
@@ -270,10 +271,9 @@ namespace ElizadeEHR
             {
                 conn.Open();
                 string query = @"
-            SELECT p.PatientID, p.FirstName, p.LastName, p.Phone, p.Gender, p.MatricNumber, p.Email, p.DateOfBirth
-            FROM patients p
-            LEFT JOIN consultations c ON p.PatientID = c.PatientID
-            WHERE c.ConsultationID IS NULL;
+       SELECT PatientID, FirstName, LastName, Phone, Gender, MatricNumber, Email, DateOfBirth
+FROM patients;
+
         ";
 
                 using (var cmd = new MySqlCommand(query, conn))
@@ -298,27 +298,6 @@ namespace ElizadeEHR
 
             return patients;
         }
-
-        //public static int StartConsultation(int patientId, int doctorId)
-        //{
-        //    using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
-        //    {
-        //        conn.Open();
-        //        string query = @"
-        //    INSERT INTO consultations (PatientID, DoctorID, StartTime, Status)
-        //    VALUES (@patientId, @doctorId, @startTime, 'Pending');
-        //    SELECT LAST_INSERT_ID();"; // Return the new ConsultationID
-
-        //        using (var cmd = new MySqlCommand(query, conn))
-        //        {
-        //            cmd.Parameters.AddWithValue("@patientId", patientId);
-        //            cmd.Parameters.AddWithValue("@doctorId", doctorId);
-        //            cmd.Parameters.AddWithValue("@startTime", DateTime.Now);
-
-        //            return Convert.ToInt32(cmd.ExecuteScalar()); // Return inserted ID if needed
-        //        }
-        //    }
-        //}
 
         public static int SaveConsultationAndGetId(Consultation consultation)
         {
@@ -403,6 +382,153 @@ namespace ElizadeEHR
             }
         }
 
-       
+        public static List<Consultation> GetCompletedConsultationsForDoctor(int doctorId)
+        {
+            var consultations = new List<Consultation>();
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = @"
+            SELECT c.ConsultationID, c.PatientID, c.DoctorID, c.VisitReason, c.Diagnosis, c.Vitals, c.LabSummary,
+                   c.FollowUpRequired, c.CreatedAt, c.IsCompleted, c.DepartureTime,
+                   p.FirstName AS PatientFirstName, p.LastName AS PatientLastName,
+                   u.FirstName AS DoctorFirstName, u.LastName AS DoctorLastName
+            FROM Consultations c
+            INNER JOIN Patients p ON c.PatientID = p.PatientID
+            INNER JOIN Users u ON c.DoctorID = u.UserID
+            WHERE c.DoctorID = @DoctorID AND c.IsCompleted = 1
+            ORDER BY c.DepartureTime DESC";
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@DoctorID", doctorId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            consultations.Add(new Consultation
+                            {
+                                ConsultationID = reader.GetInt32("ConsultationID"),
+                                PatientID = reader.GetInt32("PatientID"),
+                                DoctorID = reader.GetInt32("DoctorID"),
+                                VisitReason = reader.GetString("VisitReason"),
+                                Diagnosis = reader.GetString("Diagnosis"),
+                                Vitals = reader.GetString("Vitals"),
+                                LabSummary = reader.IsDBNull(reader.GetOrdinal("LabSummary")) ? null : reader.GetString("LabSummary"),
+                                FollowUpRequired = reader.GetBoolean("FollowUpRequired"),
+                                CreatedAt = reader.GetDateTime("CreatedAt"),
+                                IsCompleted = reader.GetBoolean("IsCompleted"),
+                                DepartureTime = reader.IsDBNull(reader.GetOrdinal("DepartureTime")) ? (DateTime?)null : reader.GetDateTime("DepartureTime"),
+                                // Optionally, add extra fields for display
+                            });
+                        }
+                    }
+                }
+            }
+            return consultations;
+        }
+
+        public static List<dynamic> GetCompletedConsultationsForDoctorToday(int doctorId)
+        {
+            var consultations = new List<dynamic>();
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = @"
+            SELECT c.ConsultationID, c.PatientID, c.DoctorID, c.DepartureTime,
+                   p.FirstName AS PatientFirstName, p.LastName AS PatientLastName,
+                   u.FirstName AS DoctorFirstName, u.LastName AS DoctorLastName
+            FROM Consultations c
+            INNER JOIN Patients p ON c.PatientID = p.PatientID
+            INNER JOIN Users u ON c.DoctorID = u.UserID
+            WHERE c.DoctorID = @DoctorID AND c.IsCompleted = 1
+              AND DATE(c.DepartureTime) = CURDATE()
+            ORDER BY c.DepartureTime DESC";
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@DoctorID", doctorId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            consultations.Add(new
+                            {
+                                ConsultationID = reader.GetInt32("ConsultationID"),
+                                DoctorName = $"{reader["DoctorFirstName"]} {reader["DoctorLastName"]}",
+                                PatientName = $"{reader["PatientFirstName"]} {reader["PatientLastName"]}",
+                                ArrivalTime = reader["DepartureTime"] is DBNull ? "" : ((DateTime)reader["DepartureTime"]).ToShortTimeString(),
+                                DepartureTime = reader["DepartureTime"] is DBNull ? "" : ((DateTime)reader["DepartureTime"]).ToString("g")
+                            });
+                        }
+                    }
+                }
+            }
+            return consultations;
+        }
+
+        public static List<Consultation> GetPendingConsultationsForDoctor(int doctorId)
+        {
+            var pending = new List<Consultation>();
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = @"
+            SELECT c.ConsultationID, c.PatientID, c.DoctorID, c.VisitReason, c.Diagnosis, c.Vitals, c.LabSummary,
+                   c.FollowUpRequired, c.CreatedAt, c.IsCompleted, c.DepartureTime
+            FROM Consultations c
+            WHERE c.DoctorID = @DoctorID AND c.IsCompleted = 0
+            ORDER BY c.CreatedAt DESC";
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@DoctorID", doctorId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            pending.Add(new Consultation
+                            {
+                                ConsultationID = reader.GetInt32("ConsultationID"),
+                                PatientID = reader.GetInt32("PatientID"),
+                                DoctorID = reader.GetInt32("DoctorID"),
+                                VisitReason = reader["VisitReason"]?.ToString(),
+                                Diagnosis = reader["Diagnosis"]?.ToString(),
+                                Vitals = reader["Vitals"]?.ToString(),
+                                LabSummary = reader["LabSummary"]?.ToString(),
+                                FollowUpRequired = reader.GetBoolean(reader.GetOrdinal("FollowUpRequired")),
+                                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                                IsCompleted = reader.GetBoolean(reader.GetOrdinal("IsCompleted")),
+                                DepartureTime = reader.IsDBNull(reader.GetOrdinal("DepartureTime")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("DepartureTime"))
+                            });
+                        }
+                    }
+                }
+            }
+            return pending;
+        }
+        public static List<LabFile> GetLabFilesByPatientId(int patientId)
+        {
+            var labFiles = new List<LabFile>();
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                string query = "SELECT LabResultID, PatientId, FileName, FilePath FROM lab_results WHERE PatientId = @PatientId";
+                var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@PatientId", patientId);
+
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        labFiles.Add(new LabFile
+                        {
+                            LabResultID = reader.GetInt32(0),
+                            PatientID = reader.GetInt32(1),
+                            FileName = reader.GetString(2),
+                            FilePath = reader.GetString(3)
+                        });
+                    }
+                }
+            }
+            return labFiles;
+        }
     }
 }

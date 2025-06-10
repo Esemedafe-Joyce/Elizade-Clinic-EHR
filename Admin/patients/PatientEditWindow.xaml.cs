@@ -27,11 +27,6 @@ namespace ElizadeEHR
             InitializeComponent();
         }
 
-        internal class DatabaseConfig
-        {
-            public static string ConnectionString = "server=localhost;database=campusehr; user=root;password=joycedafe3225%;";
-        }
-
         private Patient _patientBeingEdited;
 
         public PatientEditWindow(Patient patientToEdit = null)

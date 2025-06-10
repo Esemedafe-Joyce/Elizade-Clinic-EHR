@@ -33,6 +33,8 @@ namespace ElizadeEHR
 
             LoadProfilePicture();
             MainContentControl.Content = new DoctorDashboardHomePage(this);
+ 
+
 
             //// Show the name and email in the UI
             NameTextBlock.Text = fullName;
@@ -125,19 +127,19 @@ namespace ElizadeEHR
                 DashboardIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\Source\\Repos\\Elizade-Clinic-EHR\\white icons\\icons8-dashboard-24.png"));
                 MainContentControl.Content = new DoctorDashboardHomePage();
             }
-            else if (sender == PatientQueueButton)
-            {
-                PatientQueueButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
-                PatientQueueText.Foreground = Brushes.White;
-                QueueIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\source\\repos\\Elizade-Clinic-EHR\\white icons\\icons8-queue-50 (1).png"));
+            //else if (sender == PatientQueueButton)
+            //{
+            //    PatientQueueButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            //    PatientQueueText.Foreground = Brushes.White;
+            //    QueueIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\source\\repos\\Elizade-Clinic-EHR\\white icons\\icons8-queue-50 (1).png"));
 
-            }
+            //}
             else if (sender == PatientRecordsButton)
             {
                 PatientRecordsButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
                 PatientRecordsText.Foreground = Brushes.White;
                 RecordsIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\source\\repos\\Elizade-Clinic-EHR\\white icons\\icons8-records-50 (1).png"));
-
+                MainContentControl.Content = new PatientRecordsPage();
             }
             else if (sender == ConsultationNotesButton)
             {
@@ -168,9 +170,9 @@ namespace ElizadeEHR
             DashboardText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
             DashboardIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\source\\repos\\Elizade-Clinic-EHR\\Icons\\icons8-dashboard-48.png"));
 
-            PatientQueueButton.Background = Brushes.White;
-            PatientQueueText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
-            QueueIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\source\\repos\\Elizade-Clinic-EHR\\Icons\\icons8-queue-50.png"));
+            //PatientQueueButton.Background = Brushes.White;
+            //PatientQueueText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
+            //QueueIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\source\\repos\\Elizade-Clinic-EHR\\Icons\\icons8-queue-50.png"));
 
             PatientRecordsButton.Background = Brushes.White;
             PatientRecordsText.Foreground = (Brush)new BrushConverter().ConvertFrom("#26547C");
@@ -194,9 +196,6 @@ namespace ElizadeEHR
         {
             MainContentControl.Content = new Doctor.ConsultationPage(selectedPatient);
         }
-
-
-
 
     }
 }

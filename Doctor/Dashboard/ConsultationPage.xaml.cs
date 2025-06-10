@@ -26,6 +26,8 @@ namespace ElizadeEHR.Doctor
     /// </summary>
     public partial class ConsultationPage : UserControl
     {
+
+
         private Patient _selectedPatient;
 
         public ObservableCollection<Prescription> Prescriptions { get; set; } = new ObservableCollection<Prescription>();
@@ -34,6 +36,7 @@ namespace ElizadeEHR.Doctor
         {
             InitializeComponent();
             _selectedPatient = selectedPatient;
+           
 
             this.DataContext = this; // Or your ViewModel
             Prescriptions.Add(new Prescription()); // Optional: adds a blank row
@@ -47,6 +50,19 @@ namespace ElizadeEHR.Doctor
             
         }
 
+        public ConsultationPage(Patient selectedPatient, Consultation consultationToEdit)
+        {
+            InitializeComponent();
+            _selectedPatient = selectedPatient;
+
+            // Populate UI fields with consultationToEdit data
+            VisitReasonTextBox.Text = consultationToEdit.VisitReason;
+            // Populate other fields as needed...
+            // Example:
+            // DiagnosisBox.Document.Blocks.Clear();
+            // DiagnosisBox.Document.Blocks.Add(new Paragraph(new Run(consultationToEdit.Diagnosis)));
+            // etc.
+        }
 
         private void UploadFile_Click(object sender, RoutedEventArgs e)
         {
@@ -132,16 +148,68 @@ namespace ElizadeEHR.Doctor
         {
             SaveConsultation(isCompleted: true);
             //OnConsultationFinished?.Invoke();
+
         }
 
         private void SaveProgressButton_Click(object sender, RoutedEventArgs e)
         {
             SaveConsultation(isCompleted: false);
             //OnConsultationFinished?.Invoke();
+
         }
 
         private void SaveConsultation(bool isCompleted)
         {
+            // Only require all fields if completing the consultation
+            if (isCompleted)
+            {
+                string visitReason = VisitReasonTextBox.Text.Trim();
+                string diagnosis = new TextRange(DiagnosisBox.Document.ContentStart, DiagnosisBox.Document.ContentEnd).Text.Trim();
+                string temp = TempTextBox.Text.Trim();
+                string bp = BpTextBox.Text.Trim();
+                string weight = WeightTextBox.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(visitReason))
+                {
+                    MessageBox.Show("Visit reason is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(diagnosis))
+                {
+                    MessageBox.Show("Diagnosis is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(temp))
+                {
+                    MessageBox.Show("Temperature is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(bp))
+                {
+                    MessageBox.Show("Blood Pressure is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(weight))
+                {
+                    MessageBox.Show("Weight is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Validate at least one prescription with all fields filled
+                var validPrescriptions = PrescriptionDataGrid.Items.OfType<Prescription>()
+                    .Where(p =>
+                        !string.IsNullOrWhiteSpace(p.MedicationName) &&
+                        !string.IsNullOrWhiteSpace(p.Dosage) &&
+                        !string.IsNullOrWhiteSpace(p.Instructions))
+                    .ToList();
+
+                if (validPrescriptions.Count == 0)
+                {
+                    MessageBox.Show("At least one prescription with all fields filled is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
             try
             {
                 // Build the consultation object
@@ -154,7 +222,7 @@ namespace ElizadeEHR.Doctor
                     Vitals = $"Temp: {TempTextBox.Text.Trim()}, BP: {BpTextBox.Text.Trim()}, Weight: {WeightTextBox.Text.Trim()}",
                     LabSummary = UploadedFileNameTextBlock.Text.Contains("Uploaded:") ? UploadedFileNameTextBlock.Text : null,
                     FollowUpRequired = FollowUpCheckBox.IsChecked == true,
-                    CreatedAt = DateTime.Now, // Optional: only if manually setting it
+                    CreatedAt = DateTime.Now,
                 };
 
                 // Set completion and departure time
@@ -172,23 +240,20 @@ namespace ElizadeEHR.Doctor
                 // Save consultation
                 int consultationId = DatabaseHelper.SaveConsultationAndGetId(consultation);
 
-                // Save prescriptions if any
-                var prescriptions = new List<Prescription>();
-                foreach (var prescription in PrescriptionDataGrid.Items.OfType<Prescription>())
+                // Save prescriptions (only save valid ones)
+                var prescriptions = PrescriptionDataGrid.Items.OfType<Prescription>()
+                    .Where(p =>
+                        !string.IsNullOrWhiteSpace(p.MedicationName) &&
+                        !string.IsNullOrWhiteSpace(p.Dosage) &&
+                        !string.IsNullOrWhiteSpace(p.Instructions))
+                    .ToList();
+
+                foreach (var prescription in prescriptions)
                 {
-                    if (
-                        !string.IsNullOrWhiteSpace(prescription.MedicationName) &&
-                        !string.IsNullOrWhiteSpace(prescription.Dosage) &&
-                        !string.IsNullOrWhiteSpace(prescription.Instructions))
-                    {
-                        prescription.ConsultationID = consultationId;
-                        prescription.PatientID = _selectedPatient.PatientID;
-                        prescription.DoctorID = App.UserID;
-                        prescriptions.Add(prescription);
-                    }
+                    prescription.ConsultationID = consultationId;
+                    prescription.PatientID = _selectedPatient.PatientID;
+                    prescription.DoctorID = App.UserID;
                 }
-
-
                 if (prescriptions.Count > 0)
                 {
                     DatabaseHelper.SavePrescriptions(prescriptions);
@@ -200,6 +265,13 @@ namespace ElizadeEHR.Doctor
                     "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 DatabaseHelper.LogAction(App.UserID, $"{(isCompleted ? "Completed" : "Saved progress for")} consultation with {_selectedPatient.FirstName} {_selectedPatient.LastName}");
+
+                // Return to Doctor Dashboard homepage
+                var parentWindow = Window.GetWindow(this) as DoctorDashboard;
+                if (parentWindow != null)
+                {
+                    parentWindow.MainContentControl.Content = new DoctorDashboardHomePage(parentWindow);
+                }
             }
             catch (Exception ex)
             {
@@ -207,5 +279,14 @@ namespace ElizadeEHR.Doctor
             }
         }
 
+        private void EditPendingConsultation_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button != null && button.Tag is int consultationId)
+            {
+                // Logic to handle editing the pending consultation
+                MessageBox.Show($"Edit consultation with ID: {consultationId}", "Edit Consultation", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
     }
 }
