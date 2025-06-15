@@ -12,7 +12,6 @@ namespace ElizadeEHR
 {
     public class DatabaseHelper
     {
-        //public static string connectionString = "server=localhost;database=campusehr;user=root;password=joycedafe3225%;";
         public static List<Patient> GetAllPatients()
         {
             List<Patient> patients = new List<Patient>();
@@ -37,6 +36,7 @@ namespace ElizadeEHR
                             Gender = reader.GetString("Gender"),
                             Phone = reader.GetString("Phone"),
                             Email = reader.GetString("Email"),
+                            
                         });
                     }
                 }

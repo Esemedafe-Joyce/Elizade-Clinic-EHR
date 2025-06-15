@@ -139,7 +139,7 @@ namespace ElizadeEHR
                 PatientRecordsButton.Background = (Brush)new BrushConverter().ConvertFrom("#26547C");
                 PatientRecordsText.Foreground = Brushes.White;
                 RecordsIcon.Source = new BitmapImage(new Uri("C:\\Users\\Joyce\\source\\repos\\Elizade-Clinic-EHR\\white icons\\icons8-records-50 (1).png"));
-                MainContentControl.Content = new PatientRecordsPage();
+                //MainContentControl.Content = new PatientRecordsPage();
             }
             else if (sender == ConsultationNotesButton)
             {

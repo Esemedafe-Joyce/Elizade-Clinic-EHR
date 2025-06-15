@@ -18,9 +18,47 @@
             <RowDefinition Height="Auto"/>
             <!-- Button -->
         </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-        <TextBlock Text="Select a Patient"
-               FontSize="20" FontWeight="Bold" Margin="0,0,0,10" Foreground="#26547C"/>
+            <TextBlock Text="Select a Patient"
+               Grid.Column="0"
+               FontSize="20"
+               FontWeight="Bold"
+               Margin="0,0,0,10"
+               Foreground="#26547C"
+               VerticalAlignment="Center"/>
+
+            <Grid Grid.Column="1"
+          Width="250"  Margin="0,0,10,0"
+          Height="40"
+          HorizontalAlignment="Right">
+                <TextBox x:Name="SearchBox"
+                 Style="{StaticResource SearchTextBoxStyle}"
+                 TextChanged="SearchBox_TextChanged"/>
+                <TextBlock x:Name="SearchPlaceholder"
+                   Text="Search by name or email..."
+                   Foreground="#888"
+                   FontFamily="Poppins"
+                   FontSize="13"
+                   Margin="10,0,0,0"
+                   VerticalAlignment="Center"
+                   IsHitTestVisible="False"
+                   Visibility="Visible"/>
+                <Button x:Name="SearchButton"
+                Background="Transparent"
+                BorderThickness="0"
+                HorizontalAlignment="Right"
+                Click="SearchButton_Click"
+                Cursor="Hand">
+                    <Image Source="/Icons/icons8-search-50.png" Width="35" Height="35"/>
+                </Button>
+            </Grid>
+        </Grid>
+
 
         <DataGrid x:Name="PatientsDataGrid" Grid.Row="1"
               AutoGenerateColumns="False" IsReadOnly="True"

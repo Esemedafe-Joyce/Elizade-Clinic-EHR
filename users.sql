@@ -23,10 +23,11 @@ CREATE TABLE Patients (
     LastName VARCHAR(255) NOT NULL,
     FirstName VARCHAR(255) NOT NULL,
     DateOfBirth DATE NOT NULL,
-    Gender ENUM('Male', 'Female', 'Other') NOT NULL,
+    Gender ENUM('Male', 'Female') NOT NULL,
     MatricNumber VARCHAR(100),
     Phone VARCHAR(20),
     Email VARCHAR(255) UNIQUE,
+    MedicalAlerts TEXT,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -36,18 +36,17 @@ namespace ElizadeEHR.Doctor
         {
             InitializeComponent();
             _selectedPatient = selectedPatient;
-           
 
-            this.DataContext = this; // Or your ViewModel
-            Prescriptions.Add(new Prescription()); // Optional: adds a blank row
+            this.DataContext = this;
+            Prescriptions.Add(new Prescription());
 
-
-            // Populate UI fields manually
             PatientFullNameTextBlock.Text = $"{_selectedPatient.FirstName} {_selectedPatient.LastName}";
             PatientDOBTextBlock.Text = _selectedPatient.DateOfBirth.ToString("MMMM dd, yyyy");
             PatientGenderTextBlock.Text = _selectedPatient.Gender;
             VisitDateTextBlock.Text = DateTime.Now.ToShortDateString();
-            
+
+            // Preload Medical Alerts from patient profile
+            //MedicalAlertsTextBox.Text = _selectedPatient.MedicalAlerts ?? string.Empty;
         }
 
         public ConsultationPage(Patient selectedPatient, Consultation consultationToEdit)
@@ -239,6 +238,14 @@ namespace ElizadeEHR.Doctor
 
                 // Save consultation
                 int consultationId = DatabaseHelper.SaveConsultationAndGetId(consultation);
+
+                //// Save updated MedicalAlerts to patient profile if changed
+                //string newMedicalAlerts = MedicalAlertsTextBox.Text.Trim();
+                //if (_selectedPatient.MedicalAlerts != newMedicalAlerts)
+                //{
+                //    _selectedPatient.MedicalAlerts = newMedicalAlerts;
+                //    DatabaseHelper.UpdatePatient(_selectedPatient);
+                //}
 
                 // Save prescriptions (only save valid ones)
                 var prescriptions = PrescriptionDataGrid.Items.OfType<Prescription>()
