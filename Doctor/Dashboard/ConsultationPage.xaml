@@ -10,13 +10,15 @@
         <StackPanel Margin="30" Orientation="Vertical" VerticalAlignment="Top" >
 
             <!-- Patient Overview -->
-            <GroupBox Header="Patient Overview" FontSize="16" FontWeight="Bold" Margin="0,0,0,20" Height="249">
+            <!-- Patient Overview -->
+            <GroupBox Header="Patient Overview" FontSize="16" FontWeight="Bold" Margin="0,0,0,20" Height="320">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -36,11 +38,25 @@
                     <TextBlock Text="Date of Visit:" FontWeight="SemiBold" Grid.Row="3" Grid.Column="0" Margin="0,5"/>
                     <TextBlock x:Name="VisitDateTextBlock" Grid.Row="3" Grid.Column="1" Margin="0,5"/>
 
-                    <!--<TextBlock Text="Medical Alert:" FontWeight="SemiBold" Grid.Row="4" Grid.Column="0" Margin="0,5"/>
-                    <TextBox x:Name="MedicalAlertsTextBox" Grid.Row="4" Grid.Column="1" Margin="0,5"/>-->
+                    <!-- Medical Flags Section -->
+                    <TextBlock Text="Medical Flags:" FontWeight="SemiBold" Grid.Row="4" Grid.Column="0" Margin="0,5" VerticalAlignment="Top"/>
+                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,5">
+                        <TextBox x:Name="MedicalAlertsTextBox" 
+                     Height="60" 
+                     AcceptsReturn="True" 
+                     TextWrapping="Wrap" 
+                     VerticalScrollBarVisibility="Auto"
+                     ToolTip="Enter patient's allergies, chronic conditions, and other medical alerts"
+                     TextChanged="MedicalAlertsTextBox_TextChanged"/>
+                        <TextBlock x:Name="MedicalAlertsStatusTextBlock" 
+                       FontSize="10" 
+                       Foreground="Gray" 
+                       Margin="0,2,0,0"
+                       Text="Changes will be saved to patient profile"/>
+                    </StackPanel>
 
-                    <TextBlock Text="Visit Reason:" FontWeight="SemiBold" Grid.Row="4" Grid.Column="0" Margin="0,37,0,-27"/>
-                    <TextBox x:Name="VisitReasonTextBox" Grid.Row="4" Grid.Column="1" Margin="0,37,0,-27"/>
+                    <TextBlock Text="Visit Reason:" FontWeight="SemiBold" Grid.Row="5" Grid.Column="0" Margin="0,5"/>
+                    <TextBox x:Name="VisitReasonTextBox" Grid.Row="5" Grid.Column="1" Margin="0,5"/>
                 </Grid>
             </GroupBox>
 

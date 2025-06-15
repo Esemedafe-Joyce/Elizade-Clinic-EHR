@@ -10,7 +10,7 @@ CREATE TABLE Users (
     FirstName VARCHAR(255) NOT NULL,
     Email VARCHAR(255) UNIQUE NOT NULL,
     PasswordHash VARCHAR(255) NOT NULL,
-    Gender ENUM('Male', 'Female', 'Other') NOT NULL,
+    Gender ENUM('Male', 'Female') NOT NULL,
     Phone VARCHAR(20) NOT NULL,
     Role ENUM('Admin', 'Doctor') NOT NULL,
     ProfilePicture VARCHAR(255) DEFAULT 'default.png',

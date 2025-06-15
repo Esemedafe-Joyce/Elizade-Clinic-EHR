@@ -17,30 +17,30 @@ namespace ElizadeEHR
             List<Patient> patients = new List<Patient>();
 
 
-                using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
-                {
-                    conn.Open();
+            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
                 string query = "SELECT PatientID, MatricNumber, LastName, FirstName, DateOfBirth, Gender, Phone, Email FROM patients";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
-                    MySqlDataReader reader = cmd.ExecuteReader();
+                MySqlDataReader reader = cmd.ExecuteReader();
 
-                    while (reader.Read())
+                while (reader.Read())
+                {
+                    patients.Add(new Patient
                     {
-                        patients.Add(new Patient
-                        {
-                            PatientID = reader.GetInt32("PatientID"),
-                            MatricNumber = reader.IsDBNull(reader.GetOrdinal("MatricNumber")) ? null : reader.GetString("MatricNumber"),
-                            LastName = reader.GetString("LastName"),
-                            FirstName = reader.GetString("FirstName"),
-                            DateOfBirth = reader.GetDateTime("DateOfBirth"),
-                            Gender = reader.GetString("Gender"),
-                            Phone = reader.GetString("Phone"),
-                            Email = reader.GetString("Email"),
-                            
-                        });
-                    }
+                        PatientID = reader.GetInt32("PatientID"),
+                        MatricNumber = reader.IsDBNull(reader.GetOrdinal("MatricNumber")) ? null : reader.GetString("MatricNumber"),
+                        LastName = reader.GetString("LastName"),
+                        FirstName = reader.GetString("FirstName"),
+                        DateOfBirth = reader.GetDateTime("DateOfBirth"),
+                        Gender = reader.GetString("Gender"),
+                        Phone = reader.GetString("Phone"),
+                        Email = reader.GetString("Email"),
+
+                    });
                 }
-            
+            }
+
             return patients;
         }
         public static List<User> GetAllUsers()
@@ -196,7 +196,7 @@ namespace ElizadeEHR
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString ))
+                using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
                 {
                     conn.Open();
                     string query = @"
@@ -263,6 +263,7 @@ namespace ElizadeEHR
             cmd.Parameters.AddWithValue("@id", patientId);
             cmd.ExecuteNonQuery();
         }
+        // Update the GetPendingPatientsForConsultation method to include MedicalAlerts
         public static List<Patient> GetPendingPatientsForConsultation()
         {
             var patients = new List<Patient>();
@@ -271,10 +272,8 @@ namespace ElizadeEHR
             {
                 conn.Open();
                 string query = @"
-       SELECT PatientID, FirstName, LastName, Phone, Gender, MatricNumber, Email, DateOfBirth
-FROM patients;
-
-        ";
+        SELECT PatientID, FirstName, LastName, Phone, Gender, MatricNumber, Email, DateOfBirth, MedicalAlerts
+        FROM patients";
 
                 using (var cmd = new MySqlCommand(query, conn))
                 using (var reader = cmd.ExecuteReader())
@@ -290,7 +289,8 @@ FROM patients;
                             Gender = reader.GetString("Gender"),
                             MatricNumber = reader.IsDBNull(reader.GetOrdinal("MatricNumber")) ? null : reader.GetString("MatricNumber"),
                             Email = reader.GetString("Email"),
-                            Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString("Phone")
+                            Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString("Phone"),
+                            MedicalAlerts = reader.IsDBNull(reader.GetOrdinal("MedicalAlerts")) ? null : reader.GetString("MedicalAlerts")
                         });
                     }
                 }
@@ -302,6 +302,12 @@ FROM patients;
         public static int SaveConsultationAndGetId(Consultation consultation)
         {
             int newId = 0;
+
+            // Ensure CreatedAt has a valid value
+            if (consultation.CreatedAt == DateTime.MinValue || consultation.CreatedAt == default(DateTime))
+            {
+                consultation.CreatedAt = DateTime.Now;
+            }
             using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
             {
                 conn.Open();
@@ -339,8 +345,8 @@ FROM patients;
             {
                 conn.Open();
                 string query = @"
-            INSERT INTO lab_results (PatientID, ConsultationID, FileName, FilePath, UploadedBy)
-            VALUES (@PatientID, @ConsultationID, @FileName, @FilePath, @UploadedBy)";
+            INSERT INTO lab_results (PatientID, ConsultationID, FileName, FilePath, UploadedAt, UploadedBy)
+            VALUES (@PatientID, @ConsultationID, @FileName, @FilePath, @UploadedAt, @UploadedBy)";
 
                 using (var cmd = new MySqlCommand(query, conn))
                 {
@@ -348,6 +354,7 @@ FROM patients;
                     cmd.Parameters.AddWithValue("@ConsultationID", labFile.ConsultationID);
                     cmd.Parameters.AddWithValue("@FileName", labFile.FileName);
                     cmd.Parameters.AddWithValue("@FilePath", labFile.FilePath);
+                    cmd.Parameters.AddWithValue("@UploadedAt", labFile.UploadedAt);
                     cmd.Parameters.AddWithValue("@UploadedBy", labFile.UploadedBy);
 
                     cmd.ExecuteNonQuery();
@@ -509,10 +516,9 @@ FROM patients;
             var labFiles = new List<LabFile>();
             using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
             {
-                string query = "SELECT LabResultID, PatientId, FileName, FilePath FROM lab_results WHERE PatientId = @PatientId";
+                string query = "SELECT FileName, UploadedAt FROM lab_results WHERE PatientId = @PatientId";
                 var cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@PatientId", patientId);
-
                 conn.Open();
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -520,15 +526,71 @@ FROM patients;
                     {
                         labFiles.Add(new LabFile
                         {
-                            LabResultID = reader.GetInt32(0),
-                            PatientID = reader.GetInt32(1),
-                            FileName = reader.GetString(2),
-                            FilePath = reader.GetString(3)
+                            FileName = reader.IsDBNull(0) ? null : reader.GetString(0),
+                            UploadedAt = reader.IsDBNull(1) ? DateTime.MinValue : reader.GetDateTime(1)
                         });
                     }
                 }
             }
             return labFiles;
         }
+        // Get patient with medical alerts
+        public static Patient GetPatientWithMedicalAlerts(int patientId)
+        {
+            Patient patient = null;
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = "SELECT PatientID, FirstName, LastName, DateOfBirth, Gender, MatricNumber, Phone, Email, MedicalAlerts, CreatedAt FROM Patients WHERE PatientID = @PatientID";
+                var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@PatientID", patientId);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        patient = new Patient
+                        {
+                            PatientID = reader.GetInt32("PatientID"),
+                            FirstName = reader.GetString("FirstName"),
+                            LastName = reader.GetString("LastName"),
+                            DateOfBirth = reader.GetDateTime("DateOfBirth"),
+                            Gender = reader.GetString("Gender"),
+                            MatricNumber = reader.IsDBNull(reader.GetOrdinal("MatricNumber")) ? null : reader.GetString("MatricNumber"),
+                            Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString("Phone"),
+                            Email = reader.GetString("Email"),
+                            MedicalAlerts = reader.IsDBNull(reader.GetOrdinal("MedicalAlerts")) ? null : reader.GetString("MedicalAlerts"),
+                            CreatedAt = reader.GetDateTime("CreatedAt")
+                        };
+                    }
+                }
+            }
+            return patient;
+        }
+
+        // Update patient medical alerts only
+        public static bool UpdatePatientMedicalAlerts(int patientId, string medicalAlerts)
+        {
+            try
+            {
+                using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+                {
+                    conn.Open();
+                    string query = "UPDATE Patients SET MedicalAlerts = @MedicalAlerts WHERE PatientID = @PatientID";
+                    var cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@MedicalAlerts", medicalAlerts);
+                    cmd.Parameters.AddWithValue("@PatientID", patientId);
+
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating medical alerts: {ex.Message}", "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+        // Update the GetPendingPatientsForConsultation method to include MedicalAlerts
+      
     }
 }

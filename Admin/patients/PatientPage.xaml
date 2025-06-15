@@ -71,6 +71,7 @@ BorderBrush="#26547C"
             <!-- DataGrid -->
             <DataGrid x:Name="PatientsDataGrid" Grid.Row="2"       
                   AutoGenerateColumns="False"
+                      CanUserReorderColumns="False"
       CanUserResizeColumns="False"
       HeadersVisibility="Column"
       Margin="4"
@@ -86,7 +87,7 @@ BorderBrush="#26547C"
       BorderThickness="1"
       SelectionMode="Single"
       SelectionUnit="FullRow"
-      HorizontalAlignment="Stretch">
+      HorizontalAlignment="Stretch" SelectionChanged="PatientsDataGrid_SelectionChanged">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Setter Property="Padding" Value="5"/>

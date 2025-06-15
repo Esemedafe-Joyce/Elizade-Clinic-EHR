@@ -26,9 +26,9 @@ namespace ElizadeEHR.Doctor
     /// </summary>
     public partial class ConsultationPage : UserControl
     {
-
-
         private Patient _selectedPatient;
+        private string _originalMedicalAlerts;
+        private bool _medicalAlertsChanged = false;
 
         public ObservableCollection<Prescription> Prescriptions { get; set; } = new ObservableCollection<Prescription>();
 
@@ -40,13 +40,8 @@ namespace ElizadeEHR.Doctor
             this.DataContext = this;
             Prescriptions.Add(new Prescription());
 
-            PatientFullNameTextBlock.Text = $"{_selectedPatient.FirstName} {_selectedPatient.LastName}";
-            PatientDOBTextBlock.Text = _selectedPatient.DateOfBirth.ToString("MMMM dd, yyyy");
-            PatientGenderTextBlock.Text = _selectedPatient.Gender;
-            VisitDateTextBlock.Text = DateTime.Now.ToShortDateString();
-
-            // Preload Medical Alerts from patient profile
-            //MedicalAlertsTextBox.Text = _selectedPatient.MedicalAlerts ?? string.Empty;
+            // Load patient data with medical alerts
+            LoadPatientData();
         }
 
         public ConsultationPage(Patient selectedPatient, Consultation consultationToEdit)
@@ -54,13 +49,57 @@ namespace ElizadeEHR.Doctor
             InitializeComponent();
             _selectedPatient = selectedPatient;
 
+            this.DataContext = this;
+
+            // Load patient data first
+            LoadPatientData();
+
             // Populate UI fields with consultationToEdit data
             VisitReasonTextBox.Text = consultationToEdit.VisitReason;
             // Populate other fields as needed...
-            // Example:
-            // DiagnosisBox.Document.Blocks.Clear();
-            // DiagnosisBox.Document.Blocks.Add(new Paragraph(new Run(consultationToEdit.Diagnosis)));
-            // etc.
+        }
+
+        private void LoadPatientData()
+        {
+            // Get complete patient data including medical alerts
+            var patientWithAlerts = DatabaseHelper.GetPatientWithMedicalAlerts(_selectedPatient.PatientID);
+            if (patientWithAlerts != null)
+            {
+                _selectedPatient = patientWithAlerts;
+            }
+
+            // Populate basic patient info
+            PatientFullNameTextBlock.Text = $"{_selectedPatient.FirstName} {_selectedPatient.LastName}";
+            PatientDOBTextBlock.Text = _selectedPatient.DateOfBirth.ToString("MMMM dd, yyyy");
+            PatientGenderTextBlock.Text = _selectedPatient.Gender;
+            VisitDateTextBlock.Text = DateTime.Now.ToShortDateString();
+
+            // Load medical alerts
+            _originalMedicalAlerts = _selectedPatient.MedicalAlerts ?? string.Empty;
+            MedicalAlertsTextBox.Text = _originalMedicalAlerts;
+
+            // Update status
+            UpdateMedicalAlertsStatus();
+        }
+
+        private void MedicalAlertsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _medicalAlertsChanged = MedicalAlertsTextBox.Text.Trim() != _originalMedicalAlerts;
+            UpdateMedicalAlertsStatus();
+        }
+
+        private void UpdateMedicalAlertsStatus()
+        {
+            if (_medicalAlertsChanged)
+            {
+                MedicalAlertsStatusTextBlock.Text = "Medical flags modified - will be saved to patient profile";
+                MedicalAlertsStatusTextBlock.Foreground = new SolidColorBrush(Colors.Orange);
+            }
+            else
+            {
+                MedicalAlertsStatusTextBlock.Text = "Changes will be saved to patient profile";
+                MedicalAlertsStatusTextBlock.Foreground = new SolidColorBrush(Colors.Gray);
+            }
         }
 
         private void UploadFile_Click(object sender, RoutedEventArgs e)
@@ -76,37 +115,34 @@ namespace ElizadeEHR.Doctor
                 string sourcePath = openFileDialog.FileName;
                 string fileName = System.IO.Path.GetFileName(sourcePath);
                 string destinationDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LabFiles");
-                Directory.CreateDirectory(destinationDir); // ensure directory exists
+                Directory.CreateDirectory(destinationDir);
 
                 string destinationPath = System.IO.Path.Combine(destinationDir, fileName);
                 File.Copy(sourcePath, destinationPath, overwrite: true);
 
-                // Show file name in UI
                 UploadedFileNameTextBlock.Text = $"Uploaded: {fileName}";
 
-                // Create a new Consultation record
                 var newConsultation = new Consultation
                 {
                     PatientID = _selectedPatient.PatientID,
-                    DoctorID = App.UserID, // Assuming current user is a doctor
-                    VisitReason = "Lab result upload", // Replace as needed
-                    Diagnosis = "", // Can be filled later
-                    Vitals = "",    // Can be filled later
+                    DoctorID = App.UserID,
+                    VisitReason = "Lab result upload",
+                    Diagnosis = "",
+                    Vitals = "",
                     LabSummary = $"Uploaded file: {fileName}",
                     FollowUpRequired = false
                 };
 
-                // Save and get the ConsultationID
                 int currentConsultationId = DatabaseHelper.SaveConsultationAndGetId(newConsultation);
 
-                // Save lab result to DB
                 DatabaseHelper.SaveLabFile(new LabFile
                 {
                     FileName = fileName,
                     FilePath = destinationPath,
                     PatientID = _selectedPatient.PatientID,
                     ConsultationID = currentConsultationId,
-                    UploadedBy = App.UserID
+                    UploadedBy = App.UserID,
+                    UploadedAt = DateTime.Today
                 });
 
                 DatabaseHelper.LogAction(App.UserID, "Uploaded a Lab File");
@@ -122,7 +158,6 @@ namespace ElizadeEHR.Doctor
 
         private void VitalsTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            // Allow common keys like Backspace, Delete, Tab, etc.
             if (e.Key == Key.Back || e.Key == Key.Delete || e.Key == Key.Tab || e.Key == Key.Left || e.Key == Key.Right)
                 e.Handled = false;
         }
@@ -141,25 +176,19 @@ namespace ElizadeEHR.Doctor
             }
         }
 
-        //public event Action OnConsultationFinished;
-
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             SaveConsultation(isCompleted: true);
-            //OnConsultationFinished?.Invoke();
-
         }
 
         private void SaveProgressButton_Click(object sender, RoutedEventArgs e)
         {
             SaveConsultation(isCompleted: false);
-            //OnConsultationFinished?.Invoke();
-
         }
 
         private void SaveConsultation(bool isCompleted)
         {
-            // Only require all fields if completing the consultation
+            // Validation for completed consultation
             if (isCompleted)
             {
                 string visitReason = VisitReasonTextBox.Text.Trim();
@@ -194,7 +223,6 @@ namespace ElizadeEHR.Doctor
                     return;
                 }
 
-                // Validate at least one prescription with all fields filled
                 var validPrescriptions = PrescriptionDataGrid.Items.OfType<Prescription>()
                     .Where(p =>
                         !string.IsNullOrWhiteSpace(p.MedicationName) &&
@@ -211,6 +239,27 @@ namespace ElizadeEHR.Doctor
 
             try
             {
+                // Save medical alerts if changed
+                if (_medicalAlertsChanged)
+                {
+                    string newMedicalAlerts = MedicalAlertsTextBox.Text.Trim();
+                    bool alertsUpdated = DatabaseHelper.UpdatePatientMedicalAlerts(_selectedPatient.PatientID, newMedicalAlerts);
+
+                    if (alertsUpdated)
+                    {
+                        _selectedPatient.MedicalAlerts = newMedicalAlerts;
+                        _originalMedicalAlerts = newMedicalAlerts;
+                        _medicalAlertsChanged = false;
+                        UpdateMedicalAlertsStatus();
+
+                        DatabaseHelper.LogAction(App.UserID, $"Updated medical flags for {_selectedPatient.FirstName} {_selectedPatient.LastName}");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to update medical flags. Please try again.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+
                 // Build the consultation object
                 var consultation = new Consultation
                 {
@@ -224,7 +273,6 @@ namespace ElizadeEHR.Doctor
                     CreatedAt = DateTime.Now,
                 };
 
-                // Set completion and departure time
                 if (isCompleted)
                 {
                     consultation.IsCompleted = true;
@@ -239,15 +287,7 @@ namespace ElizadeEHR.Doctor
                 // Save consultation
                 int consultationId = DatabaseHelper.SaveConsultationAndGetId(consultation);
 
-                //// Save updated MedicalAlerts to patient profile if changed
-                //string newMedicalAlerts = MedicalAlertsTextBox.Text.Trim();
-                //if (_selectedPatient.MedicalAlerts != newMedicalAlerts)
-                //{
-                //    _selectedPatient.MedicalAlerts = newMedicalAlerts;
-                //    DatabaseHelper.UpdatePatient(_selectedPatient);
-                //}
-
-                // Save prescriptions (only save valid ones)
+                // Save prescriptions
                 var prescriptions = PrescriptionDataGrid.Items.OfType<Prescription>()
                     .Where(p =>
                         !string.IsNullOrWhiteSpace(p.MedicationName) &&
@@ -261,6 +301,7 @@ namespace ElizadeEHR.Doctor
                     prescription.PatientID = _selectedPatient.PatientID;
                     prescription.DoctorID = App.UserID;
                 }
+
                 if (prescriptions.Count > 0)
                 {
                     DatabaseHelper.SavePrescriptions(prescriptions);
@@ -291,7 +332,6 @@ namespace ElizadeEHR.Doctor
             var button = sender as Button;
             if (button != null && button.Tag is int consultationId)
             {
-                // Logic to handle editing the pending consultation
                 MessageBox.Show($"Edit consultation with ID: {consultationId}", "Edit Consultation", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }

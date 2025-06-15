@@ -15,7 +15,7 @@ namespace ElizadeEHR
             public string MatricNumber { get; set; }
             public string Phone { get; set; }
             public string Email { get; set; }
-        //public string MedicalAlerts { get; set; } // Allergies, chronic conditions
+        public string MedicalAlerts { get; set; } // Allergies, chronic conditions
         public DateTime CreatedAt { get; set; }
     }
 }

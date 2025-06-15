@@ -12,74 +12,44 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ElizadeEHR.Doctor.Records;
 
-namespace ElizadeEHR
+namespace ElizadeEHR.Doctor
 {
     /// <summary>
-    /// Interaction logic for PatientPage.xaml
+    /// Interaction logic for PatientsRecord.xaml
     /// </summary>
-    public partial class PatientPage : UserControl
+    public partial class PatientsRecord : UserControl
     {
-        public PatientPage()
+        public PatientsRecord()
         {
             InitializeComponent();
             LoadPatients();
         }
         private void LoadPatients()
         {
-            // Fetch all users (staff)
-            List<Patient> patient = DatabaseHelper.GetAllPatients();
-            PatientsDataGrid.ItemsSource = patient;
-        }
-        private Patient GetSelectedPatient()
-        {
-            return PatientsDataGrid.SelectedItem as Patient;
+            // Fetch all patients
+            List<Patient> patients = DatabaseHelper.GetAllPatients();
+            PatientsDataGrid.ItemsSource = patients;
         }
 
-        private void AddPatientButton_Click(object sender, RoutedEventArgs e)
+        private void ViewRecords_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new PatientEditWindow();           // A dialog you create for add/edit
-            if (dlg.ShowDialog() == true)
+            var button = sender as Button;
+            var patient = button?.DataContext as Patient;
+            if (patient == null)
             {
-                LoadPatients();
-            }
-        }
-
-        private void EditPatient_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedPatient = PatientsDataGrid.SelectedItem as Patient;
-            if (selectedPatient == null)
-            {
-                MessageBox.Show("Please select a patient to edit.");
+                MessageBox.Show("Please select a patient.");
                 return;
             }
 
-            var dlg = new PatientEditWindow(selectedPatient);
-            if (dlg.ShowDialog() == true)
+            // Find the parent window and set its content
+            var parentWindow = Window.GetWindow(this) as DoctorDashboard;
+            if (parentWindow != null)
             {
-                LoadPatients();
+                parentWindow.MainContentControl.Content = new PatientRecordsDetailPage(patient);
             }
         }
-
-
-        private void DeletePatient_Click(object sender, RoutedEventArgs e)
-        {
-            var selected = GetSelectedPatient();
-            if (selected == null)
-            {
-                MessageBox.Show("Please select a patient first.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            var result = MessageBox.Show($"Are you sure you want to delete {selected.FirstName} {selected.LastName}?",
-                                         "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
-            {
-                DatabaseHelper.DeletePatient(selected.PatientID);
-                LoadPatients();
-            }
-        }
-
         // Class-level variables to store search state
         private string currentSearchText = string.Empty;
         private string selectedGender = string.Empty;
@@ -162,11 +132,6 @@ namespace ElizadeEHR
             }
             // Optionally perform search immediately when role changes
             PerformSearch();
-        }
-
-        private void PatientsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
         }
     }
 }

@@ -1,0 +1,163 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using ElizadeEHR.Helpers;
+
+namespace ElizadeEHR.Doctor.Records
+{
+    /// <summary>
+    /// Interaction logic for PatientRecordsDetailPage.xaml
+    /// </summary>
+    public partial class PatientRecordsDetailPage : UserControl
+    {
+        private Patient _selectedPatient;
+        private List<LabFile> _labFiles;
+
+        public List<LabFile> LabFiles
+        {
+            get { return _labFiles; }
+            set { _labFiles = value; }
+        }
+
+        public PatientRecordsDetailPage(Patient selectedPatient)
+        {
+            InitializeComponent();
+            _selectedPatient = selectedPatient;
+            this.DataContext = this;
+
+            PatientFullNameTextBlock.Text = $"{_selectedPatient.FirstName} {_selectedPatient.LastName}";
+            PatientDOBTextBlock.Text = _selectedPatient.DateOfBirth.ToString("MMMM dd, yyyy");
+            PatientGenderTextBlock.Text = _selectedPatient.Gender;
+            EmailTextBlock.Text = _selectedPatient.Email;
+            PhoneNumberTextBlock.Text = _selectedPatient.Phone;
+            MedicalHistoryTextBlock.Text = _selectedPatient.MedicalAlerts;
+
+            // Load lab files
+            LabFiles = DatabaseHelper.GetLabFilesByPatientId(_selectedPatient.PatientID);
+            LabFilesDataGrid.ItemsSource = LabFiles;
+        }
+        private void ViewLabFile_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Button button = sender as Button;
+                LabFile labFile = button?.CommandParameter as LabFile;
+
+                if (labFile == null)
+                {
+                    MessageBox.Show("Unable to retrieve file information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Get the file path from database or construct it
+                string filePath = GetLabFileFullPath(labFile.FilePath);
+
+                if (!File.Exists(filePath))
+                {
+                    MessageBox.Show($"File not found: {labFile.FileName}", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Open the file with the default application
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void DownloadLabFile_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Button button = sender as Button;
+                LabFile labFile = button?.CommandParameter as LabFile;
+
+                if (labFile == null)
+                {
+                    MessageBox.Show("Unable to retrieve file information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Get the source file path
+                string sourceFilePath = GetLabFileFullPath(labFile.FilePath);
+
+                if (!File.Exists(sourceFilePath))
+                {
+                    MessageBox.Show($"File not found: {labFile.FileName}", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Show save file dialog
+                Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    FileName = labFile.FileName,
+                    Filter = GetFileFilter(labFile.FileName),
+                    Title = "Save Lab File"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    // Copy the file to the selected location
+                    File.Copy(sourceFilePath, saveFileDialog.FileName, true);
+                    MessageBox.Show($"File downloaded successfully to: {saveFileDialog.FileName}", "Download Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error downloading file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Helper method to get the full file path
+        private string GetLabFileFullPath(string fileName)
+        {
+            // Adjust this path based on where your lab files are stored
+            string labFilesDirectory = @"C:\LabFiles\"; // or ConfigurationManager.AppSettings["LabFilesPath"]
+            return System.IO.Path.Combine(labFilesDirectory, fileName);
+        }
+
+        // Helper method to determine file filter for save dialog (C# 7.3 compatible)
+        private string GetFileFilter(string fileName)
+        {
+            string extension = System.IO.Path.GetExtension(fileName).ToLower();
+
+            if (extension == ".pdf")
+                return "PDF Files|*.pdf|All Files|*.*";
+            else if (extension == ".jpg" || extension == ".jpeg")
+                return "JPEG Images|*.jpg;*.jpeg|All Files|*.*";
+            else if (extension == ".png")
+                return "PNG Images|*.png|All Files|*.*";
+            else if (extension == ".doc")
+                return "Word Documents|*.doc|All Files|*.*";
+            else if (extension == ".docx")
+                return "Word Documents|*.docx|All Files|*.*";
+            else if (extension == ".txt")
+                return "Text Files|*.txt|All Files|*.*";
+            else if (extension == ".csv")
+                return "CSV Files|*.csv|All Files|*.*";
+            else if (extension == ".xlsx" || extension == ".xls")
+                return "Excel Files|*.xlsx;*.xls|All Files|*.*";
+            else
+                return "All Files|*.*";
+        }
+    }
+}
