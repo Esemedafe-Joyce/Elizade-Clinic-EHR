@@ -38,16 +38,39 @@ namespace ElizadeEHR.Doctor.Records
             _selectedPatient = selectedPatient;
             this.DataContext = this;
 
+            // Load complete patient data with medical alerts (like in ConsultationPage)
+            LoadPatientData();
+
+            // Load lab files
+            LabFiles = DatabaseHelper.GetLabFilesByPatientId(_selectedPatient.PatientID);
+            LabFilesDataGrid.ItemsSource = LabFiles;
+        }
+
+        private void LoadPatientData()
+        {
+            // Get complete patient data including medical alerts
+            var patientWithAlerts = DatabaseHelper.GetPatientWithMedicalAlerts(_selectedPatient.PatientID);
+            if (patientWithAlerts != null)
+            {
+                _selectedPatient = patientWithAlerts;
+            }
+
+            // Populate patient info
             PatientFullNameTextBlock.Text = $"{_selectedPatient.FirstName} {_selectedPatient.LastName}";
             PatientDOBTextBlock.Text = _selectedPatient.DateOfBirth.ToString("MMMM dd, yyyy");
             PatientGenderTextBlock.Text = _selectedPatient.Gender;
             EmailTextBlock.Text = _selectedPatient.Email;
             PhoneNumberTextBlock.Text = _selectedPatient.Phone;
-            MedicalHistoryTextBlock.Text = _selectedPatient.MedicalAlerts;
 
-            // Load lab files
-            LabFiles = DatabaseHelper.GetLabFilesByPatientId(_selectedPatient.PatientID);
-            LabFilesDataGrid.ItemsSource = LabFiles;
+            // Set medical history
+            if (string.IsNullOrEmpty(_selectedPatient.MedicalAlerts))
+            {
+                MedicalHistoryTextBlock.Text = "No medical history recorded";
+            }
+            else
+            {
+                MedicalHistoryTextBlock.Text = _selectedPatient.MedicalAlerts;
+            }
         }
         private void ViewLabFile_Click(object sender, RoutedEventArgs e)
         {
@@ -56,14 +79,7 @@ namespace ElizadeEHR.Doctor.Records
                 Button button = sender as Button;
                 LabFile labFile = button?.CommandParameter as LabFile;
 
-                if (labFile == null)
-                {
-                    MessageBox.Show("Unable to retrieve file information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                // Get the file path from database or construct it
-                string filePath = GetLabFileFullPath(labFile.FilePath);
+                string filePath = DatabaseHelper.GetLabFileFullPath(labFile.FileName);
 
                 if (!File.Exists(filePath))
                 {
@@ -71,7 +87,6 @@ namespace ElizadeEHR.Doctor.Records
                     return;
                 }
 
-                // Open the file with the default application
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = filePath,
@@ -97,12 +112,31 @@ namespace ElizadeEHR.Doctor.Records
                     return;
                 }
 
-                // Get the source file path
-                string sourceFilePath = GetLabFileFullPath(labFile.FilePath);
+                // Try multiple possible locations
+                string[] possiblePaths = {
+            GetLabFileFullPath(labFile.FilePath),
+            GetLabFileFullPath(labFile.FileName),
+            labFile.FilePath,  // Maybe it's already a full path
+            System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Elizade Clinic", "LabFiles", labFile.FileName),
+            // Add any other possible locations where the file might be
+        };
 
-                if (!File.Exists(sourceFilePath))
+                string sourceFilePath = null;
+                foreach (string path in possiblePaths)
                 {
-                    MessageBox.Show($"File not found: {labFile.FileName}", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    if (File.Exists(path))
+                    {
+                        sourceFilePath = path;
+                        break;
+                    }
+                }
+
+                if (sourceFilePath == null)
+                {
+                    // Show all locations we checked
+                    string searchedPaths = string.Join("\n", possiblePaths);
+                    MessageBox.Show($"File 'internship.jpg' not found in any of these locations:\n\n{searchedPaths}",
+                                  "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -116,9 +150,9 @@ namespace ElizadeEHR.Doctor.Records
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
-                    // Copy the file to the selected location
                     File.Copy(sourceFilePath, saveFileDialog.FileName, true);
-                    MessageBox.Show($"File downloaded successfully to: {saveFileDialog.FileName}", "Download Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"File downloaded successfully to: {saveFileDialog.FileName}",
+                                  "Download Complete", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)

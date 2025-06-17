@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ElizadeEHR.Helpers;
 using Microsoft.Win32;
-using Mysqlx.Session;
 
 namespace ElizadeEHR.Doctor
 {
@@ -27,6 +19,11 @@ namespace ElizadeEHR.Doctor
     public partial class ConsultationPage : UserControl
     {
         private Patient _selectedPatient;
+        private Consultation _currentConsultation;
+        private int _currentConsultationId;
+        private string _pendingLabFileName = null;
+        private string _pendingLabFilePath = null;
+
         private string _originalMedicalAlerts;
         private bool _medicalAlertsChanged = false;
 
@@ -48,6 +45,8 @@ namespace ElizadeEHR.Doctor
         {
             InitializeComponent();
             _selectedPatient = selectedPatient;
+            _currentConsultation = consultationToEdit;
+            _currentConsultationId = consultationToEdit.ConsultationID;
 
             this.DataContext = this;
 
@@ -104,6 +103,12 @@ namespace ElizadeEHR.Doctor
 
         private void UploadFile_Click(object sender, RoutedEventArgs e)
         {
+            if (_selectedPatient == null)
+            {
+                MessageBox.Show("No patient selected.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Filter = "All Files (*.*)|*.*",
@@ -112,41 +117,41 @@ namespace ElizadeEHR.Doctor
 
             if (openFileDialog.ShowDialog() == true)
             {
-                string sourcePath = openFileDialog.FileName;
-                string fileName = System.IO.Path.GetFileName(sourcePath);
-                string destinationDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LabFiles");
-                Directory.CreateDirectory(destinationDir);
-
-                string destinationPath = System.IO.Path.Combine(destinationDir, fileName);
-                File.Copy(sourcePath, destinationPath, overwrite: true);
-
-                UploadedFileNameTextBlock.Text = $"Uploaded: {fileName}";
-
-                var newConsultation = new Consultation
+                try
                 {
-                    PatientID = _selectedPatient.PatientID,
-                    DoctorID = App.UserID,
-                    VisitReason = "Lab result upload",
-                    Diagnosis = "",
-                    Vitals = "",
-                    LabSummary = $"Uploaded file: {fileName}",
-                    FollowUpRequired = false
-                };
+                    string sourcePath = openFileDialog.FileName;
+                    string fileName = Path.GetFileName(sourcePath);
+                    string saveDirectory = GetLabFilesDirectory();
+                    string destinationPath = Path.Combine(saveDirectory, fileName);
 
-                int currentConsultationId = DatabaseHelper.SaveConsultationAndGetId(newConsultation);
+                    // Copy file to destination
+                    File.Copy(sourcePath, destinationPath, true);
 
-                DatabaseHelper.SaveLabFile(new LabFile
+                    // Store file info for later database save
+                    _pendingLabFileName = fileName;
+                    _pendingLabFilePath = fileName; // or full path if needed
+
+                    // Update UI
+                    UploadedFileNameTextBlock.Text = $"Ready to save: {fileName}";
+
+                    DatabaseHelper.LogAction(App.UserID, "Selected Lab File for upload");
+                }
+                catch (Exception ex)
                 {
-                    FileName = fileName,
-                    FilePath = destinationPath,
-                    PatientID = _selectedPatient.PatientID,
-                    ConsultationID = currentConsultationId,
-                    UploadedBy = App.UserID,
-                    UploadedAt = DateTime.Today
-                });
-
-                DatabaseHelper.LogAction(App.UserID, "Uploaded a Lab File");
+                    MessageBox.Show($"Error uploading file: {ex.Message}", "Upload Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
+        }
+
+        public static string GetLabFilesDirectory()
+        {
+            string baseFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string labFilesFolder = System.IO.Path.Combine(baseFolder, "Elizade Clinic", "LabFiles");
+
+            if (!Directory.Exists(labFilesFolder))
+                Directory.CreateDirectory(labFilesFolder);
+
+            return labFilesFolder;
         }
 
         private static readonly Regex _allowedInput = new Regex(@"^[0-9./\- ]+$");
@@ -268,7 +273,7 @@ namespace ElizadeEHR.Doctor
                     VisitReason = VisitReasonTextBox.Text.Trim(),
                     Diagnosis = new TextRange(DiagnosisBox.Document.ContentStart, DiagnosisBox.Document.ContentEnd).Text.Trim(),
                     Vitals = $"Temp: {TempTextBox.Text.Trim()}, BP: {BpTextBox.Text.Trim()}, Weight: {WeightTextBox.Text.Trim()}",
-                    LabSummary = UploadedFileNameTextBlock.Text.Contains("Uploaded:") ? UploadedFileNameTextBlock.Text : null,
+                    LabSummary = !string.IsNullOrEmpty(_pendingLabFileName) ? $"Lab file: {_pendingLabFileName}" : null,
                     FollowUpRequired = FollowUpCheckBox.IsChecked == true,
                     CreatedAt = DateTime.Now,
                 };
@@ -284,10 +289,28 @@ namespace ElizadeEHR.Doctor
                     consultation.DepartureTime = null;
                 }
 
-                // Save consultation
+                // Save consultation and get ID
                 int consultationId = DatabaseHelper.SaveConsultationAndGetId(consultation);
 
-                // Save prescriptions
+                // NOW save the lab file with the consultation ID
+                if (!string.IsNullOrEmpty(_pendingLabFileName))
+                {
+                    DatabaseHelper.SaveLabFile(new LabFile
+                    {
+                        FileName = _pendingLabFileName,
+                        FilePath = _pendingLabFilePath,
+                        PatientID = _selectedPatient.PatientID,
+                        ConsultationID = consultationId, // Now we have the ID!
+                        UploadedBy = App.UserID,
+                        UploadedAt = DateTime.Now
+                    });
+
+                    // Update UI to show it's actually saved
+                    UploadedFileNameTextBlock.Text = $"Uploaded: {_pendingLabFileName}";
+                    DatabaseHelper.LogAction(App.UserID, "Saved Lab File to database");
+                }
+
+                // Save prescriptions (existing code)
                 var prescriptions = PrescriptionDataGrid.Items.OfType<Prescription>()
                     .Where(p =>
                         !string.IsNullOrWhiteSpace(p.MedicationName) &&
