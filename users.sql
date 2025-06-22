@@ -38,6 +38,7 @@ CREATE TABLE Consultations (
     DoctorID INT NOT NULL,
     VisitReason TEXT NOT NULL,
     Diagnosis TEXT,
+    TreatmentPlan TEXT,
     Vitals TEXT,
     LabSummary TEXT,
     FollowUpRequired BOOLEAN DEFAULT FALSE,
@@ -58,19 +59,12 @@ CREATE TABLE Prescriptions (
     Dosage VARCHAR(100) NOT NULL,
     Instructions TEXT NOT NULL,
     DatePrescribed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    SentToPharmacy BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (ConsultationID) REFERENCES Consultations(ConsultationID) ON DELETE CASCADE,
     FOREIGN KEY (PatientID) REFERENCES Patients(PatientID) ON DELETE CASCADE,
     FOREIGN KEY (DoctorID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 
--- Pharmacy table
-CREATE TABLE Pharmacy (
-    MedicationID INT AUTO_INCREMENT PRIMARY KEY,
-    MedicationName VARCHAR(255) NOT NULL UNIQUE,
-    StockQuantity INT DEFAULT 0,
-    ExpiryDate DATE NOT NULL
-);
+
 
 -- AuditLogs table
 CREATE TABLE AuditLogs (
@@ -78,16 +72,6 @@ CREATE TABLE AuditLogs (
     UserID INT NOT NULL,
     Action VARCHAR(255) NOT NULL,
     Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
-);
-
--- Notifications table
-CREATE TABLE Notifications (
-    NotificationID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT NOT NULL,
-    Message TEXT NOT NULL,
-    IsRead BOOLEAN DEFAULT FALSE,
-    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 

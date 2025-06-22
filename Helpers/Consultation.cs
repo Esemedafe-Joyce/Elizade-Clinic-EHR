@@ -11,8 +11,9 @@ namespace ElizadeEHR.Helpers
         public int ConsultationID { get; set; }      // Primary Key (auto-increment)
         public int PatientID { get; set; }           // FK to Patients table
         public int DoctorID { get; set; }            // FK to Users table (for doctors)
-
+        public string DoctorName { get; set; }
         public string VisitReason { get; set; }      // Reason for visit
+        public string TreatmentPlan { get; set; }
         public string Diagnosis { get; set; }        // Optional diagnosis text
         public string Vitals { get; set; }           // Optional vitals info
         public string LabSummary { get; set; }       // Summary of lab needs/results

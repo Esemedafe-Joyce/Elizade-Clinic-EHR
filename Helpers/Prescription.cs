@@ -16,7 +16,6 @@ namespace ElizadeEHR.Helpers
         public string Dosage { get; set; }
         public string Instructions { get; set; }
         public DateTime DatePrescribed { get; set; }
-        public bool SentToPharmacy { get; set; }
     }
 
 }

@@ -272,6 +272,7 @@ namespace ElizadeEHR.Doctor
                     DoctorID = App.UserID,
                     VisitReason = VisitReasonTextBox.Text.Trim(),
                     Diagnosis = new TextRange(DiagnosisBox.Document.ContentStart, DiagnosisBox.Document.ContentEnd).Text.Trim(),
+                    TreatmentPlan = TreatmentPlanBox.Text.Trim(),
                     Vitals = $"Temp: {TempTextBox.Text.Trim()}, BP: {BpTextBox.Text.Trim()}, Weight: {WeightTextBox.Text.Trim()}",
                     LabSummary = !string.IsNullOrEmpty(_pendingLabFileName) ? $"Lab file: {_pendingLabFileName}" : null,
                     FollowUpRequired = FollowUpCheckBox.IsChecked == true,
@@ -320,9 +321,11 @@ namespace ElizadeEHR.Doctor
 
                 foreach (var prescription in prescriptions)
                 {
+                    //prescription.PrescriptionID = prescription.PrescriptionID;
                     prescription.ConsultationID = consultationId;
                     prescription.PatientID = _selectedPatient.PatientID;
                     prescription.DoctorID = App.UserID;
+                    prescription.DatePrescribed = DateTime.Now;
                 }
 
                 if (prescriptions.Count > 0)

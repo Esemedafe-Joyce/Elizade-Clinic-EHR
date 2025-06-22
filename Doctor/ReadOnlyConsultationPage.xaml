@@ -1,14 +1,15 @@
-﻿<UserControl x:Class="ElizadeEHR.Doctor.ConsultationPage"
+﻿<UserControl x:Class="ElizadeEHR.Doctor.ReadOnlyConsultationPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ElizadeEHR.Doctor"
              mc:Ignorable="d" 
-             >
+             d:DesignHeight="450" d:DesignWidth="800">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="30" Orientation="Vertical" VerticalAlignment="Top" >
 
+            <!-- Patient Overview -->
             <!-- Patient Overview -->
             <GroupBox Header="Patient Overview" FontSize="16" FontWeight="Bold" Margin="0,0,0,20" Height="320">
                 <Grid Margin="10">
@@ -40,92 +41,82 @@
                     <!-- Medical Flags Section -->
                     <TextBlock Text="Medical Flags:" FontWeight="SemiBold" Grid.Row="4" Grid.Column="0" Margin="0,5" VerticalAlignment="Top"/>
                     <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,5">
-                        <TextBox x:Name="MedicalAlertsTextBox" 
-                     Height="60" 
-                     AcceptsReturn="True" 
-                     TextWrapping="Wrap" 
-                     VerticalScrollBarVisibility="Auto"
-                     ToolTip="Enter patient's allergies, chronic conditions, and other medical alerts"
-                     TextChanged="MedicalAlertsTextBox_TextChanged"/>
-                        <TextBlock x:Name="MedicalAlertsStatusTextBlock" 
-                       FontSize="10" 
-                       Foreground="Gray" 
-                       Margin="0,2,0,0"
-                       Text="Changes will be saved to patient profile"/>
+                        <TextBox x:Name="MedicalAlertsTextBox" IsReadOnly="True"
+                  Height="60" 
+                  AcceptsReturn="True" 
+                  TextWrapping="Wrap" 
+                  VerticalScrollBarVisibility="Auto"
+                  ToolTip="Enter patient's allergies, chronic conditions, and other medical alerts"
+                  />
+                        <!--<TextBlock x:Name="MedicalAlertsStatusTextBlock" 
+                    FontSize="10" 
+                    Foreground="Gray" 
+                    Margin="0,2,0,0"
+                    Text="Changes will be saved to patient profile"/>-->
                     </StackPanel>
 
                     <TextBlock Text="Visit Reason:" FontWeight="SemiBold" Grid.Row="5" Grid.Column="0" Margin="0,5"/>
-                    <TextBox x:Name="VisitReasonTextBox" Grid.Row="5" Grid.Column="1" Margin="0,5"/>
+                    <TextBox x:Name="VisitReasonTextBox" Grid.Row="5" Grid.Column="1" Margin="0,5" IsReadOnly="True"/>
                 </Grid>
             </GroupBox>
-
-
 
             <!-- Vitals Section -->
             <GroupBox Header="Vitals" FontSize="16" FontWeight="Bold" Margin="0,0,0,20">
                 <UniformGrid Columns="3" Margin="10" HorizontalAlignment="Stretch">
                     <StackPanel>
                         <TextBlock Text="Temperature (°C)" />
-                        <TextBox x:Name="TempTextBox"
-                     PreviewTextInput="VitalsTextBox_PreviewTextInput"
-                     PreviewKeyDown="VitalsTextBox_PreviewKeyDown"
-                     DataObject.Pasting="VitalsTextBox_Pasting" />
+                        <TextBox x:Name="TempTextBox" IsReadOnly="True"
+                 />
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="Blood Pressure" />
-                        <TextBox x:Name="BpTextBox"
-                     PreviewTextInput="VitalsTextBox_PreviewTextInput"
-                     PreviewKeyDown="VitalsTextBox_PreviewKeyDown"
-                     DataObject.Pasting="VitalsTextBox_Pasting" />
+                        <TextBox x:Name="BpTextBox" IsReadOnly="True"
+                 />
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="Weight (kg)" />
-                        <TextBox x:Name="WeightTextBox"
-                     PreviewTextInput="VitalsTextBox_PreviewTextInput"
-                     PreviewKeyDown="VitalsTextBox_PreviewKeyDown"
-                     DataObject.Pasting="VitalsTextBox_Pasting" />
+                        <TextBox x:Name="WeightTextBox" IsReadOnly="True"
+               />
                     </StackPanel>
                 </UniformGrid>
             </GroupBox>
 
-
             <!-- Diagnosis Section -->
             <GroupBox Header="Diagnosis &amp; Observations" FontSize="16" FontWeight="Bold" Margin="0,0,0,20">
-                <RichTextBox x:Name="DiagnosisBox" Height="120" Margin="10"/>
+                <TextBox x:Name="DiagnosisBox" Height="120" Margin="10" IsReadOnly="True"/>
             </GroupBox>
 
             <!-- Treatment Plan -->
             <GroupBox Header="Treatment Plan" FontSize="16" FontWeight="Bold" Margin="0,0,0,20">
                 <StackPanel Margin="10">
-                    <TextBox x:Name="TreatmentPlanBox" AcceptsReturn="True" Height="100" />
-                    <CheckBox x:Name="FollowUpCheckBox" Content="Follow-Up Required" Margin="0,10,0,0" FontWeight="SemiBold"/>
+                    <TextBox x:Name="TreatmentPlanBox" AcceptsReturn="True" Height="100" IsReadOnly="True" />
+                    <CheckBox x:Name="FollowUpCheckBox" Content="Follow-Up Required" Margin="0,10,0,0" FontWeight="SemiBold" IsEnabled="False"/>
                 </StackPanel>
             </GroupBox>
-
 
             <!-- Prescription -->
             <GroupBox Header="Prescription" FontSize="16" FontWeight="Bold" Margin="0,0,0,20">
                 <DataGrid x:Name="PrescriptionDataGrid"
-              AutoGenerateColumns="False"
-              CanUserAddRows="True"
-              CanUserDeleteRows="True"
-              CanUserResizeColumns="False"
-              Height="200"
-              Margin="10"
-              HeadersVisibility="Column"
-              GridLinesVisibility="All"
-              ItemsSource="{Binding Prescriptions, Mode=TwoWay}"
-              IsReadOnly="False">
+           AutoGenerateColumns="False"
+           CanUserAddRows="False"
+           CanUserDeleteRows="False"
+           CanUserResizeColumns="False"
+           Height="200"
+           Margin="10"
+           HeadersVisibility="Column"
+           GridLinesVisibility="All"
+           ItemsSource="{Binding Prescriptions, Mode=TwoWay}"
+           IsReadOnly="True">
 
                     <DataGrid.Columns>
-                        <!-- Editable Medication Name -->
-                        <DataGridTextColumn Header="Medication Name" Binding="{Binding MedicationName, Mode=TwoWay}" MinWidth="200"/>
+                        <!-- Read-only Medication Name -->
+                        <DataGridTextColumn Header="Medication Name" Binding="{Binding MedicationName}" MinWidth="200" IsReadOnly="True"/>
 
-                        <!-- Editable Dosage -->
-                        <DataGridTextColumn Header="Dosage" Binding="{Binding Dosage, Mode=TwoWay}" MinWidth="200"/>
+                        <!-- Read-only Dosage -->
+                        <DataGridTextColumn Header="Dosage" Binding="{Binding Dosage}" MinWidth="200" IsReadOnly="True"/>
 
-                        <!-- Editable Instructions -->
-                        <DataGridTextColumn Header="Instructions" Binding="{Binding Instructions, Mode=TwoWay}" MinWidth="200"/>
+                        <!-- Read-only Instructions -->
+                        <DataGridTextColumn Header="Instructions" Binding="{Binding Instructions}" MinWidth="200" IsReadOnly="True"/>
                     </DataGrid.Columns>
 
                 </DataGrid>
@@ -134,20 +125,17 @@
             <!-- Optional Attachments -->
             <GroupBox Header="Attachments" FontSize="16" FontWeight="Bold" Margin="0,0,0,20">
                 <StackPanel Margin="10">
-                    <Button Content="Upload Lab File" Click="UploadFile_Click" Width="150" Margin="0,10,0,5" Style="{StaticResource ActionButtonStyle}"/>
                     <TextBlock x:Name="UploadedFileNameTextBlock"
-               Text="No file uploaded. Files would be uploaded with every click."
-               FontStyle="Italic" Foreground="Gray" />
+            Text="No file uploaded."
+            FontStyle="Italic" Foreground="Gray" />
                     <!-- Add ListView for uploaded files if needed -->
                 </StackPanel>
             </GroupBox>
 
-            <!-- Save Button -->
+            <!-- Back Button -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,10">
-                <Button Content="Saving Progress" Width="200" Height="40" Click="SaveProgressButton_Click"
-                      FontWeight="SemiBold" Style="{StaticResource RoundedPrimaryButtonStyle}" Cursor="Hand" Margin="0,0,20,0"/>
-                <Button Content="Save &amp; End Consultation" Width="200" Height="40" Click="SaveButton_Click"
-                      FontWeight="SemiBold" Style="{StaticResource RoundedPrimaryButtonStyle}" Cursor="Hand"/>
+                <Button Content="Back" Width="200" Height="40" Click="BackButton_Click"
+                   FontWeight="SemiBold" Style="{StaticResource RoundedPrimaryButtonStyle}" Cursor="Hand"/>
             </StackPanel>
 
         </StackPanel>

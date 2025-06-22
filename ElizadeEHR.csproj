@@ -173,6 +173,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Doctor\ReadOnlyConsultationPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Doctor\Records\PatientRecordsDetailPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -197,6 +201,9 @@
     </Compile>
     <Compile Include="Doctor\Dashboard\PatientSelectionWindow.xaml.cs">
       <DependentUpon>PatientSelectionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Doctor\ReadOnlyConsultationPage.xaml.cs">
+      <DependentUpon>ReadOnlyConsultationPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Doctor\Records\PatientRecordsDetailPage.xaml.cs">
       <DependentUpon>PatientRecordsDetailPage.xaml</DependentUpon>

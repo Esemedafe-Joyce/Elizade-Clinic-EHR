@@ -311,9 +311,9 @@ namespace ElizadeEHR
                 conn.Open();
                 string sql = @"
             INSERT INTO Consultations 
-            (PatientID, DoctorID, VisitReason, Diagnosis, Vitals, LabSummary, FollowUpRequired, CreatedAt, IsCompleted, DepartureTime)
+            (PatientID, DoctorID, VisitReason, Diagnosis, TreatmentPlan, Vitals, LabSummary, FollowUpRequired, CreatedAt, IsCompleted, DepartureTime)
             VALUES 
-            (@PatientID, @DoctorID, @VisitReason, @Diagnosis, @Vitals, @LabSummary, @FollowUpRequired, @CreatedAt, @IsCompleted, @DepartureTime);
+            (@PatientID, @DoctorID, @VisitReason, @Diagnosis, @TreatmentPlan, @Vitals, @LabSummary, @FollowUpRequired, @CreatedAt, @IsCompleted, @DepartureTime);
             SELECT LAST_INSERT_ID();";
 
                 using (var cmd = new MySqlCommand(sql, conn))
@@ -322,6 +322,7 @@ namespace ElizadeEHR
                     cmd.Parameters.AddWithValue("@DoctorID", consultation.DoctorID);
                     cmd.Parameters.AddWithValue("@VisitReason", consultation.VisitReason);
                     cmd.Parameters.AddWithValue("@Diagnosis", consultation.Diagnosis);
+                    cmd.Parameters.AddWithValue("@TreatmentPlan", consultation.TreatmentPlan);
                     cmd.Parameters.AddWithValue("@Vitals", consultation.Vitals);
                     cmd.Parameters.AddWithValue("@LabSummary", (object)consultation.LabSummary ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@FollowUpRequired", consultation.FollowUpRequired);
@@ -382,7 +383,7 @@ namespace ElizadeEHR
             {
                 conn.Open();
                 string query = @"
-            SELECT c.ConsultationID, c.PatientID, c.DoctorID, c.VisitReason, c.Diagnosis, c.Vitals, c.LabSummary,
+            SELECT c.ConsultationID, c.PatientID, c.DoctorID, c.VisitReason, c.Diagnosis, c.TreatmentPlan, c.Vitals, c.LabSummary,
                    c.FollowUpRequired, c.CreatedAt, c.IsCompleted, c.DepartureTime
             FROM Consultations c
             WHERE c.DoctorID = @DoctorID AND c.IsCompleted = 0
@@ -401,6 +402,7 @@ namespace ElizadeEHR
                                 DoctorID = reader.GetInt32("DoctorID"),
                                 VisitReason = reader["VisitReason"]?.ToString(),
                                 Diagnosis = reader["Diagnosis"]?.ToString(),
+                                TreatmentPlan = reader["TreatmentPlan"]?.ToString(),
                                 Vitals = reader["Vitals"]?.ToString(),
                                 LabSummary = reader["LabSummary"]?.ToString(),
                                 FollowUpRequired = reader.GetBoolean(reader.GetOrdinal("FollowUpRequired")),
@@ -415,6 +417,136 @@ namespace ElizadeEHR
             return pending;
         }
 
+        public static List<Consultation> GetConsultationsForPatient(int patientId)
+        {
+            List<Consultation> consultations = new List<Consultation>();
+            using (MySqlConnection conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = @"
+        SELECT 
+            c.ConsultationID,
+            c.PatientID,
+            c.VisitReason,
+            c.Diagnosis,
+c.TreatmentPlan,
+            c.Vitals,
+            c.LabSummary,
+            c.FollowUpRequired,
+            c.CreatedAt,
+            c.IsCompleted,
+            c.DepartureTime,
+            CONCAT(u.FirstName, ' ', u.LastName) AS DoctorName
+        FROM Consultations c
+        INNER JOIN Users u ON c.DoctorID = u.UserID
+        WHERE c.PatientID = @PatientID
+        ORDER BY c.CreatedAt DESC";
+
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@PatientID", patientId);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    consultations.Add(new Consultation
+                    {
+                        ConsultationID = reader.GetInt32("ConsultationID"),
+                        PatientID = reader.GetInt32("PatientID"),
+                        DoctorName = reader.GetString("DoctorName"),
+                        CreatedAt = reader.GetDateTime("CreatedAt"), // Fixed this line
+                        VisitReason = reader.GetString("VisitReason"),
+                        Diagnosis = reader.GetString("Diagnosis"),
+                        TreatmentPlan = reader.GetString("TreatmentPlan"),
+                        Vitals = reader.GetString("Vitals"),
+                        LabSummary = reader.GetString("LabSummary"),
+                        FollowUpRequired = reader.GetBoolean("FollowUpRequired"),
+                        IsCompleted = reader.GetBoolean("IsCompleted"),
+                        DepartureTime = reader.GetDateTime("DepartureTime")
+                    });
+                }
+            }
+            return consultations;
+        }
+        public static Consultation GetConsultationById(int consultationId)
+        {
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = @"
+        SELECT ConsultationID, PatientID, DoctorID, VisitReason, Diagnosis, TreatmentPlan, Vitals, LabSummary,
+               FollowUpRequired, CreatedAt, IsCompleted, DepartureTime
+        FROM Consultations 
+        WHERE ConsultationID = @ConsultationID";
+
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ConsultationID", consultationId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new Consultation
+                            {
+                                ConsultationID = reader.GetInt32("ConsultationID"),
+                                PatientID = reader.GetInt32("PatientID"),
+                                DoctorID = reader.GetInt32("DoctorID"),
+                                VisitReason = reader["VisitReason"]?.ToString(),
+                                Diagnosis = reader["Diagnosis"]?.ToString(),
+                                TreatmentPlan = reader["TreatmentPlan"]?.ToString(),
+                                Vitals = reader["Vitals"]?.ToString(),
+                                LabSummary = reader["LabSummary"]?.ToString(),
+                                FollowUpRequired = reader.GetBoolean("FollowUpRequired"),
+                                CreatedAt = reader.GetDateTime("CreatedAt"),
+                                IsCompleted = reader.GetBoolean("IsCompleted"),
+                                DepartureTime = reader.GetDateTime("DepartureTime")
+                            };
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+        public static List<Consultation> GetAllConsultationsByPatientId(int patientId)
+        {
+            var consultations = new List<Consultation>();
+
+            using (var conn = new MySqlConnection(DatabaseConfig.ConnectionString))
+            {
+                conn.Open();
+                string query = @"
+SELECT c.ConsultationID, c.PatientID, c.DoctorID, 
+       CONCAT(u.FirstName, ' ', u.LastName) AS DoctorName,
+       c.CreatedAt
+FROM Consultations c
+JOIN Users u ON c.DoctorID = u.UserID
+WHERE c.PatientID = @PatientID";
+
+
+
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@PatientID", patientId);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var consultation = new Consultation
+                            {
+                                ConsultationID = reader.GetInt32("ConsultationID"),
+                                PatientID = reader.GetInt32("PatientID"),
+                                DoctorID = reader.GetInt32("DoctorID"),
+                                DoctorName = reader["DoctorName"]?.ToString(),
+                                CreatedAt = reader.GetDateTime("CreatedAt")
+                            };
+                            consultations.Add(consultation);
+                        }
+                    }
+                }
+            }
+
+            return consultations;
+        }
 
         public static void SavePrescriptions(List<Prescription> prescriptions)
         {
@@ -426,17 +558,18 @@ namespace ElizadeEHR
                 {
                     using (var command = new MySqlCommand(@"
                 INSERT INTO Prescriptions 
-                    (ConsultationID, PatientID, DoctorID, MedicationName, Dosage, Instructions, SentToPharmacy)
+                    (PrescriptionID, ConsultationID, PatientID, DoctorID, MedicationName, Dosage, Instructions, DatePrescribed)
                 VALUES 
-                    (@ConsultationID, @PatientID, @DoctorID, @MedicationName, @Dosage, @Instructions, @SentToPharmacy)", connection))
+                    (@PrescriptionID, @ConsultationID, @PatientID, @DoctorID, @MedicationName, @Dosage, @Instructions, @DatePrescribed)", connection))
                     {
+                        command.Parameters.AddWithValue("@PrescriptionID", prescription.PrescriptionID);
                         command.Parameters.AddWithValue("@ConsultationID", prescription.ConsultationID);
                         command.Parameters.AddWithValue("@PatientID", prescription.PatientID);
                         command.Parameters.AddWithValue("@DoctorID", prescription.DoctorID);
                         command.Parameters.AddWithValue("@MedicationName", prescription.MedicationName);
                         command.Parameters.AddWithValue("@Dosage", prescription.Dosage);
                         command.Parameters.AddWithValue("@Instructions", prescription.Instructions);
-                        command.Parameters.AddWithValue("@SentToPharmacy", false);
+                        command.Parameters.AddWithValue("@DatePrescribed", prescription.DatePrescribed);
 
                         command.ExecuteNonQuery();
                     }

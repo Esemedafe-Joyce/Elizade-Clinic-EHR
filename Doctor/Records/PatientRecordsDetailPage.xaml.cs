@@ -24,13 +24,16 @@ namespace ElizadeEHR.Doctor.Records
     public partial class PatientRecordsDetailPage : UserControl
     {
         private Patient _selectedPatient;
+
         private List<LabFile> _labFiles;
+        private int patientID;
 
         public List<LabFile> LabFiles
         {
             get { return _labFiles; }
             set { _labFiles = value; }
         }
+
 
         public PatientRecordsDetailPage(Patient selectedPatient)
         {
@@ -44,6 +47,14 @@ namespace ElizadeEHR.Doctor.Records
             // Load lab files
             LabFiles = DatabaseHelper.GetLabFilesByPatientId(_selectedPatient.PatientID);
             LabFilesDataGrid.ItemsSource = LabFiles;
+
+            LoadConsultations(_selectedPatient.PatientID);
+            
+        }
+
+        public PatientRecordsDetailPage(int patientID)
+        {
+            this.patientID = patientID;
         }
 
         private void LoadPatientData()
@@ -192,6 +203,52 @@ namespace ElizadeEHR.Doctor.Records
                 return "Excel Files|*.xlsx;*.xls|All Files|*.*";
             else
                 return "All Files|*.*";
+        }
+
+        private void ViewConsultationRecord_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is Consultation consultation)
+            {
+                var fullConsultation = DatabaseHelper.GetConsultationById(consultation.ConsultationID);
+                if (fullConsultation != null)
+                {
+                    var readOnlyPage = new ReadOnlyConsultationPage(_selectedPatient, fullConsultation);
+                    if (Window.GetWindow(this) is DoctorDashboard parentWindow)
+                    {
+                        parentWindow.MainContentControl.Content = readOnlyPage;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Could not find the parent DoctorDashboard window.", "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Consultation record could not be retrieved.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+
+        private void LoadConsultations(int patientId)
+        {
+            var consultations = DatabaseHelper.GetAllConsultationsByPatientId(patientId);
+            ConsultationsDataGrid.ItemsSource = consultations;
+        }
+        public void GoBack()
+        {
+            var parentWindow = Window.GetWindow(this) as DoctorDashboard;
+            if (parentWindow != null)
+            {
+                // Navigate back to patient details page with the patient ID
+                var patientsRecord = new PatientsRecord();
+                parentWindow.MainContentControl.Content = patientsRecord;
+            }
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            GoBack();
         }
     }
 }

@@ -98,10 +98,17 @@
                 <DataGridTemplateColumn Header="Action" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="Edit"
+                            <StackPanel>
+                                <Button Content="Edit"
                                     Click="EditPendingConsultation_Click"
                                     Tag="{Binding ConsultationID}" 
                                     Style="{StaticResource ActionButtonStyle}" Background="#26547C" Foreground="White"/>
+                                <!--<Button Content="View"
+                                    
+                                    Tag="{Binding ConsultationID}" 
+                                    Style="{StaticResource ActionButtonStyle}" Background="#26547C" Foreground="White"/>-->
+                            </StackPanel>
+                            
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -109,3 +116,4 @@
         </DataGrid>
     </Grid>
 </UserControl>
+<!--Click="ViewConsultation_Click"-->
